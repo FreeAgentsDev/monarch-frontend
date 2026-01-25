@@ -13,4 +13,17 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'chart-vendor': ['recharts'],
+        },
+      },
+    },
+  },
 })
