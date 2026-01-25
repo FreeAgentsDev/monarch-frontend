@@ -9,7 +9,6 @@ import {
   ArrowDownRight,
   Store,
   Calculator,
-  AlertCircle,
   CheckCircle,
   Clock,
   Globe,
@@ -18,8 +17,6 @@ import {
 import { dashboardApi, ordersApi, shopifyApi, accountingApi, DashboardStats, Order, Shop, Transaction } from '../services/api'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts'
 import { format } from 'date-fns'
-
-const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
@@ -97,7 +94,7 @@ export default function Dashboard() {
     return format(date, 'EEE')
   })
 
-  const dailySalesData = recentDays.map((day, i) => ({
+  const dailySalesData = recentDays.map((day) => ({
     name: day,
     ventas: Math.floor(Math.random() * 5000) + 2000,
   }))

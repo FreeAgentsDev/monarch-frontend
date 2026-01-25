@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Use relative URL for same-origin API (Vercel serverless functions)
 // or use VITE_API_URL if provided (for external API)
-const apiBaseURL = import.meta.env.VITE_API_URL || '/api'
+const apiBaseURL = (import.meta.env?.VITE_API_URL as string | undefined) || '/api'
 
 const api = axios.create({
   baseURL: apiBaseURL,

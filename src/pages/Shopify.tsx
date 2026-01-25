@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Store, RefreshCw, CheckCircle, XCircle, Clock, Globe, DollarSign, ShoppingBag } from 'lucide-react'
+import { Store, RefreshCw, CheckCircle, XCircle, Clock, Globe, ShoppingBag } from 'lucide-react'
 import { shopifyApi, Shop } from '../services/api'
 import { format } from 'date-fns'
 
