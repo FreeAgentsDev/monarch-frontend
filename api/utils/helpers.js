@@ -41,14 +41,29 @@ function sendError(res, statusCode, message) {
  * Parse query parameters
  */
 function parseQuery(query) {
+  if (!query) return {};
   const parsed = {};
   for (const [key, value] of Object.entries(query)) {
     if (value === 'true') parsed[key] = true;
     else if (value === 'false') parsed[key] = false;
-    else if (!isNaN(value) && value !== '') parsed[key] = Number(value);
+    else if (!isNaN(value) && value !== '' && value !== null) parsed[key] = Number(value);
     else parsed[key] = value;
   }
   return parsed;
+}
+
+/**
+ * Parse request body safely
+ */
+function parseBody(req) {
+  try {
+    if (typeof req.body === 'string') {
+      return JSON.parse(req.body);
+    }
+    return req.body || {};
+  } catch (error) {
+    return {};
+  }
 }
 
 /**
@@ -90,10 +105,17 @@ function paginate(array, page = 1, limit = 10) {
  * Sort array by field
  */
 function sortArray(array, sortBy, order = 'asc') {
+  if (!array || array.length === 0) return array;
+  if (!sortBy) return array;
+  
   const sorted = [...array];
   sorted.sort((a, b) => {
     let aVal = a[sortBy];
     let bVal = b[sortBy];
+    
+    // Handle null/undefined
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
     
     // Handle dates
     if (sortBy.includes('At') || sortBy === 'date') {
@@ -125,6 +147,7 @@ module.exports = {
   sendJSON,
   sendError,
   parseQuery,
+  parseBody,
   isValidOrderStatus,
   isValidTransactionType,
   paginate,

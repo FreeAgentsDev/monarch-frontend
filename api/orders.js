@@ -1,4 +1,4 @@
-const data = require('./data.json');
+const { loadData } = require('./utils/data-loader');
 const { handleOPTIONS, sendJSON, sendError, parseQuery, isValidOrderStatus, paginate, sortArray } = require('./utils/helpers');
 
 module.exports = async function handler(req, res) {
@@ -7,8 +7,9 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const query = parseQuery(req.query);
-    let orders = [...data.orders];
+    const data = loadData();
+    const query = parseQuery(req.query || {});
+    let orders = [...(data.orders || [])];
 
     // Apply filters
     if (query.status) {
@@ -28,26 +29,26 @@ module.exports = async function handler(req, res) {
 
     if (query.customerEmail) {
       orders = orders.filter(order => 
-        order.customerEmail.toLowerCase().includes(query.customerEmail.toLowerCase())
+        order.customerEmail && order.customerEmail.toLowerCase().includes(query.customerEmail.toLowerCase())
       );
     }
 
     if (query.search) {
       const searchTerm = query.search.toLowerCase();
       orders = orders.filter(order => 
-        order.orderNumber.toLowerCase().includes(searchTerm) ||
-        order.customerName.toLowerCase().includes(searchTerm) ||
-        order.customerEmail.toLowerCase().includes(searchTerm)
+        (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) ||
+        (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
+        (order.customerEmail && order.customerEmail.toLowerCase().includes(searchTerm))
       );
     }
 
     // Date range filters
     if (query.dateFrom) {
-      orders = orders.filter(order => new Date(order.createdAt) >= new Date(query.dateFrom));
+      orders = orders.filter(order => order.createdAt && new Date(order.createdAt) >= new Date(query.dateFrom));
     }
 
     if (query.dateTo) {
-      orders = orders.filter(order => new Date(order.createdAt) <= new Date(query.dateTo));
+      orders = orders.filter(order => order.createdAt && new Date(order.createdAt) <= new Date(query.dateTo));
     }
 
     // Amount range filters
@@ -78,6 +79,6 @@ module.exports = async function handler(req, res) {
     return sendJSON(res, 200, orders);
   } catch (error) {
     console.error('Error in orders endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };

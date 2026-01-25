@@ -1,5 +1,5 @@
-const data = require('../../data.json');
-const { handleOPTIONS, sendJSON, sendError, parseQuery, paginate, sortArray } = require('../../utils/helpers');
+const { loadData } = require('../../utils/data-loader');
+const { handleOPTIONS, sendJSON, sendError, parseQuery, parseBody, paginate, sortArray } = require('../../utils/helpers');
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -7,9 +7,11 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const data = loadData();
+    
     if (req.method === 'GET') {
-      const query = parseQuery(req.query);
-      let shops = [...data.shops];
+      const query = parseQuery(req.query || {});
+      let shops = [...(data.shops || [])];
 
       // Apply filters
       if (query.isActive !== undefined) {
@@ -47,7 +49,7 @@ module.exports = async function handler(req, res) {
 
     if (req.method === 'POST') {
       // Create new shop (mock - in real app would validate and save)
-      const newShop = req.body;
+      const newShop = parseBody(req);
       
       if (!newShop.shopifyDomain || !newShop.shopifyStoreName) {
         return sendError(res, 400, 'shopifyDomain and shopifyStoreName are required');
@@ -73,6 +75,6 @@ module.exports = async function handler(req, res) {
     return sendError(res, 405, 'Method not allowed');
   } catch (error) {
     console.error('Error in shops endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };

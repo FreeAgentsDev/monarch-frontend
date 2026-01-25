@@ -1,4 +1,4 @@
-const data = require('../../data.json');
+const { loadData } = require('../../utils/data-loader');
 const { handleOPTIONS, sendJSON, sendError, parseQuery, isValidTransactionType, paginate, sortArray } = require('../../utils/helpers');
 
 module.exports = async function handler(req, res) {
@@ -11,8 +11,9 @@ module.exports = async function handler(req, res) {
       return sendError(res, 405, 'Method not allowed');
     }
 
-    const query = parseQuery(req.query);
-    let transactions = [...data.transactions];
+    const data = loadData();
+    const query = parseQuery(req.query || {});
+    let transactions = [...(data.transactions || [])];
 
     // Apply filters
     if (query.type) {
@@ -24,7 +25,7 @@ module.exports = async function handler(req, res) {
 
     if (query.category) {
       transactions = transactions.filter(t => 
-        t.category.toLowerCase().includes(query.category.toLowerCase())
+        t.category && t.category.toLowerCase().includes(query.category.toLowerCase())
       );
     }
 
@@ -42,11 +43,11 @@ module.exports = async function handler(req, res) {
 
     // Date range filters
     if (query.dateFrom) {
-      transactions = transactions.filter(t => new Date(t.date) >= new Date(query.dateFrom));
+      transactions = transactions.filter(t => t.date && new Date(t.date) >= new Date(query.dateFrom));
     }
 
     if (query.dateTo) {
-      transactions = transactions.filter(t => new Date(t.date) <= new Date(query.dateTo));
+      transactions = transactions.filter(t => t.date && new Date(t.date) <= new Date(query.dateTo));
     }
 
     // Amount range filters
@@ -82,6 +83,6 @@ module.exports = async function handler(req, res) {
     return sendJSON(res, 200, transactions);
   } catch (error) {
     console.error('Error in transactions endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };

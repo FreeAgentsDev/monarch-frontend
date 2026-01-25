@@ -1,5 +1,5 @@
-const data = require('../../data.json');
-const { handleOPTIONS, sendJSON, sendError, isValidOrderStatus } = require('../../utils/helpers');
+const { loadData } = require('../../utils/data-loader');
+const { handleOPTIONS, sendJSON, sendError, parseBody, isValidOrderStatus } = require('../../utils/helpers');
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -11,8 +11,10 @@ module.exports = async function handler(req, res) {
       return sendError(res, 405, 'Method not allowed. Use PATCH to update status.');
     }
 
-    const { id } = req.query;
-    const { status, notes } = req.body || {};
+    const data = loadData();
+    const { id } = req.query || {};
+    const body = parseBody(req);
+    const { status, notes } = body;
 
     if (!id) {
       return sendError(res, 400, 'Order ID is required');
@@ -26,7 +28,7 @@ module.exports = async function handler(req, res) {
       return sendError(res, 400, `Invalid status. Must be one of: pending, processing, shipped, delivered, cancelled`);
     }
 
-    const order = data.orders.find(o => o.id === id);
+    const order = (data.orders || []).find(o => o.id === id);
     
     if (!order) {
       return sendError(res, 404, 'Order not found');
@@ -58,6 +60,6 @@ module.exports = async function handler(req, res) {
     });
   } catch (error) {
     console.error('Error in order status endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };

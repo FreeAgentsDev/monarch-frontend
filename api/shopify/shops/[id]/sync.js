@@ -1,5 +1,5 @@
-const data = require('../../../data.json');
-const { handleOPTIONS, sendJSON, sendError } = require('../../../utils/helpers');
+const { loadData } = require('../../../utils/data-loader');
+const { handleOPTIONS, sendJSON, sendError, parseBody } = require('../../../utils/helpers');
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -11,14 +11,16 @@ module.exports = async function handler(req, res) {
       return sendError(res, 405, 'Method not allowed. Use POST to sync shop.');
     }
 
-    const { id } = req.query;
-    const { syncType = 'orders' } = req.body || {};
+    const data = loadData();
+    const { id } = req.query || {};
+    const body = parseBody(req);
+    const { syncType = 'orders' } = body;
 
     if (!id) {
       return sendError(res, 400, 'Shop ID is required');
     }
 
-    const shop = data.shops.find(s => s.id === id);
+    const shop = (data.shops || []).find(s => s.id === id);
     
     if (!shop) {
       return sendError(res, 404, 'Shop not found');
@@ -66,6 +68,6 @@ module.exports = async function handler(req, res) {
     });
   } catch (error) {
     console.error('Error in shop sync endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };

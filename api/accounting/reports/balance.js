@@ -1,4 +1,4 @@
-const data = require('../../../data.json');
+const { loadData } = require('../../../utils/data-loader');
 const { handleOPTIONS, sendJSON, sendError } = require('../../../utils/helpers');
 
 module.exports = async function handler(req, res) {
@@ -11,19 +11,20 @@ module.exports = async function handler(req, res) {
       return sendError(res, 405, 'Method not allowed');
     }
 
-    const { date } = req.query;
+    const data = loadData();
+    const { date } = req.query || {};
     const cutoffDate = date ? new Date(date) : new Date();
 
-    const transactions = data.transactions.filter(t => new Date(t.date) <= cutoffDate);
+    const transactions = (data.transactions || []).filter(t => t.date && new Date(t.date) <= cutoffDate);
 
     // Calculate balances by account type
     const assets = transactions
       .filter(t => t.type === 'sale')
-      .reduce((sum, t) => sum + t.baseCurrencyAmount, 0);
+      .reduce((sum, t) => sum + (t.baseCurrencyAmount || 0), 0);
 
     const liabilities = transactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.baseCurrencyAmount, 0);
+      .reduce((sum, t) => sum + (t.baseCurrencyAmount || 0), 0);
 
     const equity = assets - liabilities;
 
@@ -50,6 +51,6 @@ module.exports = async function handler(req, res) {
     return sendJSON(res, 200, balance);
   } catch (error) {
     console.error('Error in balance report endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };

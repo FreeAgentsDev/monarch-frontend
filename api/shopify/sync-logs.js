@@ -1,4 +1,4 @@
-const data = require('../../data.json');
+const { loadData } = require('../../utils/data-loader');
 const { handleOPTIONS, sendJSON, sendError, parseQuery, paginate, sortArray } = require('../../utils/helpers');
 
 module.exports = async function handler(req, res) {
@@ -11,8 +11,9 @@ module.exports = async function handler(req, res) {
       return sendError(res, 405, 'Method not allowed');
     }
 
-    const query = parseQuery(req.query);
-    let logs = [...data.syncLogs];
+    const data = loadData();
+    const query = parseQuery(req.query || {});
+    let logs = [...(data.syncLogs || [])];
 
     // Apply filters
     if (query.shopId) {
@@ -29,11 +30,11 @@ module.exports = async function handler(req, res) {
 
     // Date range filters
     if (query.dateFrom) {
-      logs = logs.filter(log => new Date(log.startedAt) >= new Date(query.dateFrom));
+      logs = logs.filter(log => log.startedAt && new Date(log.startedAt) >= new Date(query.dateFrom));
     }
 
     if (query.dateTo) {
-      logs = logs.filter(log => new Date(log.startedAt) <= new Date(query.dateTo));
+      logs = logs.filter(log => log.startedAt && new Date(log.startedAt) <= new Date(query.dateTo));
     }
 
     // Sorting
@@ -55,6 +56,6 @@ module.exports = async function handler(req, res) {
     return sendJSON(res, 200, logs);
   } catch (error) {
     console.error('Error in sync logs endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };

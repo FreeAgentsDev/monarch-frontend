@@ -1,4 +1,4 @@
-const data = require('../data.json');
+const { loadData } = require('../utils/data-loader');
 const { handleOPTIONS, sendJSON, sendError } = require('../utils/helpers');
 
 module.exports = async function handler(req, res) {
@@ -11,6 +11,8 @@ module.exports = async function handler(req, res) {
       return sendError(res, 405, 'Method not allowed');
     }
 
+    const data = loadData();
+    
     // Calculate real-time stats from data
     const orders = data.orders || [];
     const transactions = data.transactions || [];
@@ -18,7 +20,7 @@ module.exports = async function handler(req, res) {
 
     // Calculate total sales from transactions
     const salesTransactions = transactions.filter(t => t.type === 'sale');
-    const totalSales = salesTransactions.reduce((sum, t) => sum + t.baseCurrencyAmount, 0);
+    const totalSales = salesTransactions.reduce((sum, t) => sum + (t.baseCurrencyAmount || 0), 0);
 
     // Calculate total orders
     const totalOrders = orders.length;
@@ -41,7 +43,7 @@ module.exports = async function handler(req, res) {
           ordersCount: 0
         };
       }
-      salesByCountryMap[country].amount += order.totalAmount;
+      salesByCountryMap[country].amount += (order.totalAmount || 0);
       salesByCountryMap[country].ordersCount += 1;
     });
 
@@ -49,6 +51,7 @@ module.exports = async function handler(req, res) {
 
     // Get recent orders (last 5, sorted by date)
     const recentOrders = [...orders]
+      .filter(o => o.createdAt)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5)
       .map(order => ({
@@ -74,15 +77,17 @@ module.exports = async function handler(req, res) {
     orders.forEach(order => {
       if (order.items && order.items.length > 0) {
         order.items.forEach(item => {
-          if (!productMap[item.title]) {
-            productMap[item.title] = {
-              name: item.title,
-              quantity: 0,
-              revenue: 0
-            };
+          if (item.title) {
+            if (!productMap[item.title]) {
+              productMap[item.title] = {
+                name: item.title,
+                quantity: 0,
+                revenue: 0
+              };
+            }
+            productMap[item.title].quantity += (item.quantity || 0);
+            productMap[item.title].revenue += (item.total || 0);
           }
-          productMap[item.title].quantity += item.quantity;
-          productMap[item.title].revenue += item.total;
         });
       }
     });
@@ -114,6 +119,6 @@ module.exports = async function handler(req, res) {
     return sendJSON(res, 200, stats);
   } catch (error) {
     console.error('Error in dashboard stats endpoint:', error);
-    return sendError(res, 500, 'Internal server error');
+    return sendError(res, 500, `Internal server error: ${error.message}`);
   }
 };
