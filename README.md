@@ -6,6 +6,7 @@ Frontend del sistema de gestión internacional para la joyería Monarch. Platafo
 ![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.2.2-3178C6?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3.6-38B2AC?logo=tailwind-css)
+![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)
 
 ## 🎯 Descripción
 
@@ -85,6 +86,27 @@ npm run build
 npm run preview
 ```
 
+## 🚀 Despliegue en Vercel
+
+### Opción 1: Desde GitHub (Recomendado)
+
+1. Conecta tu repositorio en [Vercel](https://vercel.com)
+2. Vercel detectará automáticamente la configuración
+3. Agrega la variable de entorno `VITE_API_URL`
+4. ¡Despliega!
+
+### Opción 2: Desde CLI
+
+```bash
+# Instalar Vercel CLI
+npm install -g vercel
+
+# Desplegar
+vercel
+```
+
+📖 **Guía completa**: Ver [DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)
+
 ## 🛠️ Tecnologías
 
 ### Core
@@ -130,6 +152,7 @@ frontend/
 │   └── index.css          # Estilos globales
 ├── index.html             # HTML principal
 ├── package.json           # Dependencias
+├── vercel.json            # Configuración Vercel
 ├── tsconfig.json          # Configuración TypeScript
 ├── tailwind.config.js     # Configuración Tailwind
 └── vite.config.ts         # Configuración Vite
@@ -156,6 +179,16 @@ El frontend se conecta a una API REST. Por defecto, está configurado para usar:
 
 - **Desarrollo**: `http://localhost:3001/api`
 - **Producción**: Configurar variable de entorno `VITE_API_URL`
+
+### Configuración de Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+VITE_API_URL=http://localhost:3001/api
+```
+
+Para producción en Vercel, configura la variable en el dashboard de Vercel.
 
 ### Endpoints Principales
 
@@ -195,14 +228,6 @@ npm run preview      # Preview de la build
 npm run lint         # Ejecuta ESLint
 ```
 
-### Variables de Entorno
-
-Crear archivo `.env` en la raíz del proyecto:
-
-```env
-VITE_API_URL=http://localhost:3001/api
-```
-
 ### Mock API para Desarrollo
 
 Para desarrollo local, se recomienda usar el Mock API incluido en el proyecto principal:
@@ -226,6 +251,8 @@ La aplicación está completamente optimizada para:
 
 ### Vercel (Recomendado)
 
+Ver guía completa en [DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)
+
 ```bash
 # Instalar Vercel CLI
 npm i -g vercel
@@ -234,7 +261,9 @@ npm i -g vercel
 vercel
 ```
 
-### Netlify
+### Otros Proveedores
+
+#### Netlify
 
 ```bash
 # Instalar Netlify CLI
@@ -244,7 +273,7 @@ npm i -g netlify-cli
 netlify deploy --prod
 ```
 
-### Build Manual
+#### Build Manual
 
 ```bash
 # Construir
@@ -317,8 +346,13 @@ npm install
 
 ### Error: API connection failed
 - Verificar que el Mock API esté corriendo
-- Verificar la URL en `.env`
+- Verificar la URL en `.env` o variables de entorno de Vercel
 - Revisar CORS en el servidor API
+
+### Error: Build failed en Vercel
+- Verificar que todas las dependencias estén en `package.json`
+- Revisar los logs en el dashboard de Vercel
+- Asegurarse de que `VITE_API_URL` esté configurada
 
 ## 📄 Licencia
 
