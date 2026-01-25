@@ -1,6 +1,6 @@
 # 🚀 Guía de Despliegue en Vercel
 
-Esta guía te ayudará a desplegar el frontend de Monarch en Vercel de forma rápida y sencilla.
+Esta guía te ayudará a desplegar el frontend de Monarch en Vercel de forma rápida y sencilla, **incluyendo la Mock API integrada**.
 
 ## 📋 Prerrequisitos
 
@@ -31,17 +31,13 @@ Si no se detecta automáticamente, configura manualmente:
 - Build Command: `npm run build`
 - Output Directory: `dist`
 
-### Paso 3: Variables de Entorno
+### Paso 3: Variables de Entorno (Opcional)
 
-En la sección **"Environment Variables"**, agrega:
+**IMPORTANTE**: Si quieres usar la Mock API integrada (recomendado para demo), **NO necesitas configurar** `VITE_API_URL`. El frontend usará automáticamente las funciones serverless de Vercel.
 
-```
-VITE_API_URL=https://tu-api-url.com/api
-```
-
-**Importante**: 
-- Para desarrollo: usa tu Mock API o API de desarrollo
-- Para producción: usa la URL de tu API en producción
+Si prefieres usar una API externa:
+- Agrega `VITE_API_URL` con la URL de tu API
+- Ejemplo: `https://api.monarch.com/api`
 
 ### Paso 4: Desplegar
 
@@ -49,6 +45,13 @@ VITE_API_URL=https://tu-api-url.com/api
 2. Espera a que se complete el build (2-3 minutos)
 3. ¡Listo! Tu aplicación estará disponible en una URL como:
    `https://monarch-frontend.vercel.app`
+
+**La Mock API estará disponible automáticamente en:**
+- `https://monarch-frontend.vercel.app/api/orders`
+- `https://monarch-frontend.vercel.app/api/dashboard/stats`
+- `https://monarch-frontend.vercel.app/api/accounting/transactions`
+- `https://monarch-frontend.vercel.app/api/shopify/shops`
+- etc.
 
 ## 🛠️ Opción 2: Despliegue desde CLI
 
@@ -81,58 +84,51 @@ Sigue las instrucciones:
 - **Directory?** → `./` (enter para usar el actual)
 - **Override settings?** → `N`
 
-### Paso 4: Configurar Variables de Entorno
-
-```bash
-vercel env add VITE_API_URL
-```
-
-Ingresa la URL de tu API cuando se solicite.
-
-### Paso 5: Desplegar a Producción
+### Paso 4: Desplegar a Producción
 
 ```bash
 vercel --prod
 ```
 
-## 🔧 Configuración Avanzada
+## 🔧 Mock API Integrada
 
-### Variables de Entorno por Ambiente
+### ¿Cómo Funciona?
 
-Puedes configurar diferentes variables para desarrollo, preview y producción:
+El proyecto incluye funciones serverless de Vercel en la carpeta `/api` que actúan como Mock API:
 
-```bash
-# Desarrollo
-vercel env add VITE_API_URL development
+- **`/api/orders.js`** - Endpoint de pedidos
+- **`/api/dashboard/stats.js`** - Estadísticas del dashboard
+- **`/api/accounting/transactions.js`** - Transacciones contables
+- **`/api/shopify/shops.js`** - Tiendas Shopify
+- **`/api/shopify/sync-logs.js`** - Logs de sincronización
+- **`/api/data.json`** - Datos mock
 
-# Preview
-vercel env add VITE_API_URL preview
+### Endpoints Disponibles
 
-# Producción
-vercel env add VITE_API_URL production
+```
+GET  /api/orders                    # Lista de pedidos
+GET  /api/orders/:id                # Pedido específico
+PATCH /api/orders/:id/status        # Actualizar estado
+
+GET  /api/dashboard/stats           # Estadísticas del dashboard
+
+GET  /api/accounting/transactions    # Transacciones (con filtros)
+
+GET  /api/shopify/shops             # Lista de tiendas
+POST /api/shopify/shops/:id/sync    # Sincronizar tienda
+GET  /api/shopify/sync-logs         # Logs de sincronización
 ```
 
-### Dominio Personalizado
+### Filtros Soportados
 
-1. Ve a tu proyecto en Vercel
-2. Settings → Domains
-3. Agrega tu dominio personalizado
-4. Configura los registros DNS según las instrucciones
+**Orders:**
+- `?status=pending` - Filtrar por estado
+- `?country=US` - Filtrar por país
 
-### Configuración de Rewrites
-
-El archivo `vercel.json` ya está configurado para:
-- Redirigir todas las rutas a `index.html` (SPA routing)
-- Cachear assets estáticos
-
-## 📊 Monitoreo y Analytics
-
-Vercel incluye:
-- **Analytics**: Métricas de rendimiento
-- **Speed Insights**: Core Web Vitals
-- **Logs**: Logs en tiempo real
-
-Actívalos en: Settings → Analytics
+**Transactions:**
+- `?type=sale` - Filtrar por tipo
+- `?dateFrom=2024-01-01` - Filtrar desde fecha
+- `?dateTo=2024-01-31` - Filtrar hasta fecha
 
 ## 🔄 Actualizaciones Automáticas
 
@@ -169,12 +165,18 @@ npm install
 npm run build
 ```
 
-### Error: API Connection Failed
+### Error: API Endpoints not working
 
 Verifica:
-1. La variable `VITE_API_URL` está configurada
-2. La API permite CORS desde tu dominio de Vercel
-3. La API está accesible públicamente
+1. Los archivos en `/api` están incluidos en el repositorio
+2. La estructura de carpetas es correcta
+3. Los archivos tienen extensión `.js` (no `.ts`)
+
+### Error: CORS
+
+Las funciones serverless ya incluyen headers CORS. Si tienes problemas:
+- Verifica que los headers estén en `vercel.json`
+- Revisa los logs de las funciones en Vercel
 
 ### Error: Routing not working
 
@@ -182,6 +184,10 @@ Verifica que `vercel.json` tenga la configuración de rewrites:
 ```json
 {
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
@@ -192,32 +198,71 @@ Verifica que `vercel.json` tenga la configuración de rewrites:
 
 ## 📝 Checklist Pre-Deploy
 
-- [ ] Variables de entorno configuradas
+- [ ] Archivos de API en `/api` incluidos
+- [ ] `vercel.json` configurado correctamente
 - [ ] Build local funciona (`npm run build`)
 - [ ] No hay errores de TypeScript (`npm run build`)
-- [ ] `.env.example` actualizado
-- [ ] `vercel.json` configurado
-- [ ] README actualizado con URL de producción
+- [ ] Variables de entorno configuradas (si usas API externa)
+- [ ] README actualizado
 
 ## 🚀 Post-Deploy
 
 Después del despliegue:
 
 1. **Verifica la URL**: Abre la URL proporcionada por Vercel
-2. **Prueba las funcionalidades**: Navega por todas las páginas
-3. **Revisa la consola**: Verifica que no haya errores
-4. **Configura dominio**: Si tienes dominio personalizado
-5. **Comparte el link**: Con tu equipo para testing
+2. **Prueba la API**: Visita `/api/dashboard/stats` para verificar
+3. **Prueba las funcionalidades**: Navega por todas las páginas
+4. **Revisa la consola**: Verifica que no haya errores
+5. **Configura dominio**: Si tienes dominio personalizado
+6. **Comparte el link**: Con tu equipo para testing
+
+## 📊 Monitoreo y Analytics
+
+Vercel incluye:
+- **Analytics**: Métricas de rendimiento
+- **Speed Insights**: Core Web Vitals
+- **Logs**: Logs en tiempo real de funciones serverless
+- **Function Logs**: Logs específicos de cada endpoint
+
+Actívalos en: Settings → Analytics
+
+## 🔐 Seguridad
+
+### Para Producción Real
+
+Si vas a usar esto en producción con datos reales:
+
+1. **Reemplaza la Mock API** con tu API real
+2. **Configura autenticación** en los endpoints
+3. **Usa variables de entorno** para secrets
+4. **Implementa rate limiting**
+5. **Agrega validación de datos**
+
+### Para Demo/Testing
+
+La Mock API integrada es perfecta para:
+- ✅ Demos y presentaciones
+- ✅ Testing y desarrollo
+- ✅ Prototipos
+- ✅ MVPs
 
 ## 📚 Recursos Adicionales
 
 - [Documentación de Vercel](https://vercel.com/docs)
+- [Vercel Serverless Functions](https://vercel.com/docs/concepts/functions/serverless-functions)
 - [Vite + Vercel](https://vercel.com/guides/deploying-vite-with-vercel)
 - [Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables)
 
 ## 🎉 ¡Listo!
 
-Tu aplicación debería estar desplegada y funcionando. Cada push a `main` actualizará automáticamente el deployment.
+Tu aplicación debería estar desplegada con la Mock API integrada. Cada push a `main` actualizará automáticamente el deployment.
+
+**Ventajas de este enfoque:**
+- ✅ Todo en un solo despliegue
+- ✅ Sin necesidad de servidor separado
+- ✅ Escalable automáticamente
+- ✅ Sin costos adicionales (plan gratuito de Vercel)
+- ✅ Perfecto para demos y MVPs
 
 ---
 
