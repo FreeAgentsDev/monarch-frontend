@@ -10,71 +10,76 @@ module.exports = async function handler(req, res) {
 
   try {
     // Get path from query params (Vercel catch-all routes)
-    const pathSegments = req.query.path || [];
-    const path = Array.isArray(pathSegments) ? '/' + pathSegments.join('/') : '/' + (pathSegments || '');
-    const fullPath = '/api' + path;
+    // req.query.path is an array for catch-all routes like [...path]
+    const pathArray = req.query.path || [];
+    const path = Array.isArray(pathArray) ? pathArray.join('/') : (pathArray || '');
+    const fullPath = '/api/' + path;
     const method = req.method;
-    const query = parseQuery(req.query || {});
+    
+    // Remove 'path' from query to avoid conflicts
+    const cleanQuery = { ...req.query };
+    delete cleanQuery.path;
+    const query = parseQuery(cleanQuery);
     const body = parseBody(req);
 
-    // Route: /api/orders
-    if (fullPath === '/api/orders' || path === '/orders' || path === '') {
+    // Route: /api/orders (empty path or 'orders')
+    if (path === '' || path === 'orders') {
       return handleOrders(req, res, query, body, method);
     }
 
     // Route: /api/orders/:id
-    if (fullPath.match(/^\/api\/orders\/[^/]+$/) || path.match(/^\/orders\/[^/]+$/)) {
-      const id = path.split('/').pop();
+    if (path.match(/^orders\/[^/]+$/)) {
+      const id = path.split('/')[1];
       return handleOrderById(req, res, id, query, body, method);
     }
 
     // Route: /api/orders/:id/status
-    if (fullPath.match(/^\/api\/orders\/[^/]+\/status$/) || path.match(/^\/orders\/[^/]+\/status$/)) {
+    if (path.match(/^orders\/[^/]+\/status$/)) {
       const segments = path.split('/');
-      const id = segments[segments.length - 2];
+      const id = segments[1];
       return handleOrderStatus(req, res, id, body);
     }
 
     // Route: /api/dashboard/stats
-    if (fullPath === '/api/dashboard/stats' || path === '/dashboard/stats') {
+    if (path === 'dashboard/stats') {
       return handleDashboardStats(req, res);
     }
 
     // Route: /api/accounting/transactions
-    if (fullPath === '/api/accounting/transactions' || path === '/accounting/transactions') {
+    if (path === 'accounting/transactions') {
       return handleTransactions(req, res, query);
     }
 
     // Route: /api/accounting/reports/balance
-    if (fullPath === '/api/accounting/reports/balance' || path === '/accounting/reports/balance') {
+    if (path === 'accounting/reports/balance') {
       return handleBalanceReport(req, res, query);
     }
 
     // Route: /api/accounting/reports/income
-    if (fullPath === '/api/accounting/reports/income' || path === '/accounting/reports/income') {
+    if (path === 'accounting/reports/income') {
       return handleIncomeReport(req, res, query);
     }
 
     // Route: /api/shopify/shops
-    if (fullPath === '/api/shopify/shops' || path === '/shopify/shops') {
+    if (path === 'shopify/shops') {
       return handleShops(req, res, query, body, method);
     }
 
     // Route: /api/shopify/shops/:id
-    if (fullPath.match(/^\/api\/shopify\/shops\/[^/]+$/) || path.match(/^\/shopify\/shops\/[^/]+$/)) {
-      const id = path.split('/').pop();
+    if (path.match(/^shopify\/shops\/[^/]+$/)) {
+      const id = path.split('/')[2];
       return handleShopById(req, res, id, query, body, method);
     }
 
     // Route: /api/shopify/shops/:id/sync
-    if (fullPath.match(/^\/api\/shopify\/shops\/[^/]+\/sync$/) || path.match(/^\/shopify\/shops\/[^/]+\/sync$/)) {
+    if (path.match(/^shopify\/shops\/[^/]+\/sync$/)) {
       const segments = path.split('/');
-      const id = segments[segments.length - 2];
+      const id = segments[2];
       return handleShopSync(req, res, id, body);
     }
 
     // Route: /api/shopify/sync-logs
-    if (fullPath === '/api/shopify/sync-logs' || path === '/shopify/sync-logs') {
+    if (path === 'shopify/sync-logs') {
       return handleSyncLogs(req, res, query);
     }
 
