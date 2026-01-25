@@ -1,38 +1,78 @@
 const data = require('../../data.json');
+const { handleOPTIONS, sendJSON, sendError, parseQuery, paginate, sortArray } = require('../../utils/helpers');
 
 module.exports = async function handler(req, res) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return handleOPTIONS(res);
   }
 
-  if (req.method === 'GET') {
-    return res.status(200).json(data.shops);
-  }
+  try {
+    if (req.method === 'GET') {
+      const query = parseQuery(req.query);
+      let shops = [...data.shops];
 
-  // POST for sync (mock)
-  if (req.method === 'POST' && req.url.includes('/sync')) {
-    const shopId = req.url.split('/shops/')[1]?.split('/sync')[0];
-    const shop = data.shops.find(s => s.id === shopId);
-    
-    if (!shop) {
-      return res.status(404).json({ error: 'Shop not found' });
+      // Apply filters
+      if (query.isActive !== undefined) {
+        const isActive = query.isActive === true || query.isActive === 'true';
+        shops = shops.filter(s => s.isActive === isActive);
+      }
+
+      if (query.countryCode) {
+        shops = shops.filter(s => s.countryCode === query.countryCode);
+      }
+
+      if (query.syncStatus) {
+        shops = shops.filter(s => s.syncStatus === query.syncStatus);
+      }
+
+      if (query.currency) {
+        shops = shops.filter(s => s.currency === query.currency.toUpperCase());
+      }
+
+      // Sorting
+      if (query.sortBy) {
+        shops = sortArray(shops, query.sortBy, query.sortOrder || 'asc');
+      }
+
+      // Pagination
+      if (query.page || query.limit) {
+        const page = parseInt(query.page) || 1;
+        const limit = parseInt(query.limit) || 10;
+        const result = paginate(shops, page, limit);
+        return sendJSON(res, 200, result);
+      }
+
+      return sendJSON(res, 200, shops);
     }
-    
-    // Simulate sync
-    shop.lastSyncAt = new Date().toISOString();
-    shop.syncStatus = 'success';
-    
-    return res.status(200).json({
-      success: true,
-      message: 'Sincronización iniciada',
-      shopId: shopId
-    });
-  }
 
-  return res.status(405).json({ error: 'Method not allowed' });
-}
+    if (req.method === 'POST') {
+      // Create new shop (mock - in real app would validate and save)
+      const newShop = req.body;
+      
+      if (!newShop.shopifyDomain || !newShop.shopifyStoreName) {
+        return sendError(res, 400, 'shopifyDomain and shopifyStoreName are required');
+      }
+
+      const shop = {
+        id: `shop${Date.now()}`,
+        shopifyDomain: newShop.shopifyDomain,
+        shopifyStoreName: newShop.shopifyStoreName,
+        countryCode: newShop.countryCode || 'US',
+        country: newShop.country || 'Estados Unidos',
+        currency: newShop.currency || 'USD',
+        timezone: newShop.timezone || 'America/New_York',
+        isActive: newShop.isActive !== undefined ? newShop.isActive : true,
+        lastSyncAt: null,
+        syncStatus: 'syncing',
+        ordersCount: 0
+      };
+
+      return sendJSON(res, 201, shop);
+    }
+
+    return sendError(res, 405, 'Method not allowed');
+  } catch (error) {
+    console.error('Error in shops endpoint:', error);
+    return sendError(res, 500, 'Internal server error');
+  }
+};
