@@ -1,0 +1,19 @@
+{
+  "date": "2024-01-22",
+  "assets": {
+    "total": 10236.00,
+    "current": 10236.00,
+    "fixed": 0
+  },
+  "liabilities": {
+    "total": 878.00,
+    "current": 878.00,
+    "longTerm": 0
+  },
+  "equity": {
+    "total": 9358.00,
+    "retained": 9358.00,
+    "capital": 0
+  },
+  "total": 10236.00
+}

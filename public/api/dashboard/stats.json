@@ -1,0 +1,145 @@
+{
+  "totalSales": 10936.00,
+  "totalOrders": 8,
+  "averageTicket": 1367.00,
+  "growthRate": 15.5,
+  "salesByCountry": [
+    {
+      "country": "Estados Unidos",
+      "amount": 2550.75,
+      "currency": "USD"
+    },
+    {
+      "country": "España",
+      "amount": 2086.25,
+      "currency": "EUR"
+    },
+    {
+      "country": "Reino Unido",
+      "amount": 5300.00,
+      "currency": "GBP"
+    }
+  ],
+  "recentOrders": [
+    {
+      "id": "8",
+      "shopifyOrderId": "5008",
+      "shopifyStoreId": "shop2",
+      "storeName": "Monarch España",
+      "orderNumber": "ORD-2024-008",
+      "customerEmail": "laura.martinez@example.com",
+      "customerName": "Laura Martínez",
+      "totalAmount": 520.50,
+      "currency": "EUR",
+      "status": "pending",
+      "countryCode": "ES",
+      "country": "España",
+      "createdAt": "2024-01-22T15:10:00Z",
+      "updatedAt": "2024-01-22T15:10:00Z",
+      "items": []
+    },
+    {
+      "id": "7",
+      "shopifyOrderId": "5007",
+      "shopifyStoreId": "shop1",
+      "storeName": "Monarch USA",
+      "orderNumber": "ORD-2024-007",
+      "customerEmail": "michael.wilson@example.com",
+      "customerName": "Michael Wilson",
+      "totalAmount": 850.00,
+      "currency": "USD",
+      "status": "processing",
+      "countryCode": "US",
+      "country": "Estados Unidos",
+      "createdAt": "2024-01-21T08:20:00Z",
+      "updatedAt": "2024-01-21T08:20:00Z",
+      "items": []
+    },
+    {
+      "id": "6",
+      "shopifyOrderId": "5006",
+      "shopifyStoreId": "shop3",
+      "storeName": "Monarch UK",
+      "orderNumber": "ORD-2024-006",
+      "customerEmail": "emily.brown@example.com",
+      "customerName": "Emily Brown",
+      "totalAmount": 3200.00,
+      "currency": "GBP",
+      "status": "shipped",
+      "countryCode": "GB",
+      "country": "Reino Unido",
+      "createdAt": "2024-01-20T13:30:00Z",
+      "updatedAt": "2024-01-21T10:00:00Z",
+      "items": []
+    },
+    {
+      "id": "5",
+      "shopifyOrderId": "5005",
+      "shopifyStoreId": "shop2",
+      "storeName": "Monarch España",
+      "orderNumber": "ORD-2024-005",
+      "customerEmail": "carlos.rodriguez@example.com",
+      "customerName": "Carlos Rodríguez",
+      "totalAmount": 675.00,
+      "currency": "EUR",
+      "status": "delivered",
+      "countryCode": "ES",
+      "country": "España",
+      "createdAt": "2024-01-19T11:00:00Z",
+      "updatedAt": "2024-01-22T09:15:00Z",
+      "items": []
+    },
+    {
+      "id": "4",
+      "shopifyOrderId": "5004",
+      "shopifyStoreId": "shop1",
+      "storeName": "Monarch USA",
+      "orderNumber": "ORD-2024-004",
+      "customerEmail": "sarah.johnson@example.com",
+      "customerName": "Sarah Johnson",
+      "totalAmount": 450.25,
+      "currency": "USD",
+      "status": "pending",
+      "countryCode": "US",
+      "country": "Estados Unidos",
+      "createdAt": "2024-01-18T16:45:00Z",
+      "updatedAt": "2024-01-18T16:45:00Z",
+      "items": []
+    }
+  ],
+  "topProducts": [
+    {
+      "name": "Anillo de Oro 18k - Clásico",
+      "quantity": 15,
+      "revenue": 18757.50
+    },
+    {
+      "name": "Collar de Diamantes - Exclusivo",
+      "quantity": 8,
+      "revenue": 25600.00
+    },
+    {
+      "name": "Pulsera de Diamantes - Premium",
+      "quantity": 12,
+      "revenue": 25200.00
+    },
+    {
+      "name": "Collar de Plata - Elegante",
+      "quantity": 20,
+      "revenue": 17815.00
+    },
+    {
+      "name": "Anillo de Compromiso - Oro Blanco",
+      "quantity": 10,
+      "revenue": 8500.00
+    }
+  ],
+  "activeShops": 3,
+  "totalShops": 4,
+  "totalTransactions": 11,
+  "pendingOrders": 2,
+  "processingOrders": 2,
+  "shippedOrders": 2,
+  "deliveredOrders": 2,
+  "lastUpdated": "2024-01-22T15:10:00Z"
+}

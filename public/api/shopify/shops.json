@@ -1,0 +1,54 @@
+[
+  {
+    "id": "shop1",
+    "shopifyDomain": "monarch-usa.myshopify.com",
+    "shopifyStoreName": "Monarch USA",
+    "countryCode": "US",
+    "country": "Estados Unidos",
+    "currency": "USD",
+    "timezone": "America/New_York",
+    "isActive": true,
+    "lastSyncAt": "2024-01-22T10:30:00Z",
+    "syncStatus": "success",
+    "ordersCount": 245
+  },
+  {
+    "id": "shop2",
+    "shopifyDomain": "monarch-espana.myshopify.com",
+    "shopifyStoreName": "Monarch España",
+    "countryCode": "ES",
+    "country": "España",
+    "currency": "EUR",
+    "timezone": "Europe/Madrid",
+    "isActive": true,
+    "lastSyncAt": "2024-01-22T09:15:00Z",
+    "syncStatus": "success",
+    "ordersCount": 189
+  },
+  {
+    "id": "shop3",
+    "shopifyDomain": "monarch-uk.myshopify.com",
+    "shopifyStoreName": "Monarch UK",
+    "countryCode": "GB",
+    "country": "Reino Unido",
+    "currency": "GBP",
+    "timezone": "Europe/London",
+    "isActive": true,
+    "lastSyncAt": "2024-01-22T08:45:00Z",
+    "syncStatus": "success",
+    "ordersCount": 156
+  },
+  {
+    "id": "shop4",
+    "shopifyDomain": "monarch-france.myshopify.com",
+    "shopifyStoreName": "Monarch France",
+    "countryCode": "FR",
+    "country": "Francia",
+    "currency": "EUR",
+    "timezone": "Europe/Paris",
+    "isActive": false,
+    "lastSyncAt": "2024-01-20T14:20:00Z",
+    "syncStatus": "error",
+    "ordersCount": 98
+  }
+]

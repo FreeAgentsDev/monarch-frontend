@@ -1,0 +1,20 @@
+{
+  "period": {
+    "from": "2024-01-01",
+    "to": "2024-01-22"
+  },
+  "revenue": {
+    "sales": 10236.00,
+    "refunds": 125.05,
+    "total": 10110.95
+  },
+  "expenses": {
+    "total": 878.00,
+    "byCategory": {
+      "Marketing": 500.00,
+      "Operaciones": 378.00
+    }
+  },
+  "netIncome": 9232.95,
+  "margin": "90.20"
+}
