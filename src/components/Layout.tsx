@@ -6,7 +6,9 @@ import {
   Calculator, 
   Store,
   Menu,
-  X
+  X,
+  FileSpreadsheet,
+  BarChart3
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -21,11 +23,20 @@ export default function Layout({ children }: LayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Pedidos', href: '/orders', icon: ShoppingBag },
-    { name: 'Contabilidad', href: '/accounting', icon: Calculator },
+    { name: 'Contabilidad', href: '/contabilidad', icon: Calculator },
+    { name: 'Estado de Resultados', href: '/contabilidad?tab=estado', icon: FileSpreadsheet },
+    { name: 'Análisis de datos', href: '/analisis', icon: BarChart3 },
     { name: 'Shopify', href: '/shopify', icon: Store },
   ]
 
-  const isActive = (path: string) => location.pathname === path
+  const tab = new URLSearchParams(location.search).get('tab')
+  const isActive = (path: string) => {
+    if (location.pathname === '/contabilidad') {
+      if (path === '/contabilidad') return tab !== 'estado'
+      if (path.includes('tab=estado')) return tab === 'estado'
+    }
+    return location.pathname === path.split('?')[0]
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

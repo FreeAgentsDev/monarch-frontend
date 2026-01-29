@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { DollarSign, TrendingUp, TrendingDown, Download, Filter } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { DollarSign, TrendingUp, TrendingDown, Download, Filter, FileSpreadsheet, BarChart3 } from 'lucide-react'
 import { accountingApi, Transaction } from '../services/api'
 import { format } from 'date-fns'
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 export default function Accounting() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -35,29 +35,6 @@ export default function Accounting() {
 
   const netIncome = totalRevenue - totalExpenses
 
-  // Prepare chart data
-  const monthlyData = Array.from({ length: 6 }, (_, i) => {
-    const date = new Date()
-    date.setMonth(date.getMonth() - (5 - i))
-    const monthTransactions = transactions.filter((t) => {
-      const tDate = new Date(t.date)
-      return tDate.getMonth() === date.getMonth() && tDate.getFullYear() === date.getFullYear()
-    })
-    const revenue = monthTransactions
-      .filter((t) => t.type === 'sale')
-      .reduce((sum, t) => sum + t.baseCurrencyAmount, 0)
-    const expenses = monthTransactions
-      .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.baseCurrencyAmount, 0)
-
-    return {
-      name: format(date, 'MMM'),
-      ingresos: revenue,
-      gastos: expenses,
-      utilidad: revenue - expenses,
-    }
-  })
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -69,15 +46,31 @@ export default function Accounting() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Contabilidad</h1>
-          <p className="text-gray-600 mt-1">Gestión financiera y reportes consolidados</p>
+          <h1 className="text-2xl font-bold text-gray-900">Contabilidad</h1>
+          <p className="text-gray-600 mt-1">Transacciones y vista tipo Excel por país</p>
         </div>
-        <button className="btn-primary flex items-center space-x-2">
-          <Download size={18} />
-          <span>Exportar Reporte</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            to="/estado-resultados"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
+          >
+            <FileSpreadsheet size={18} />
+            Estado de Resultados
+          </Link>
+          <Link
+            to="/analisis"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50"
+          >
+            <BarChart3 size={18} />
+            Análisis de datos
+          </Link>
+          <button className="btn-primary flex items-center space-x-2">
+            <Download size={18} />
+            <span>Exportar</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -122,37 +115,6 @@ export default function Accounting() {
               <DollarSign className="w-6 h-6 text-primary-600" />
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Estado de Resultados (6 meses)</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="ingresos" fill="#10b981" />
-              <Bar dataKey="gastos" fill="#ef4444" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="card">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Utilidad Neta</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="utilidad" stroke="#0ea5e9" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
