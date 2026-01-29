@@ -56,9 +56,10 @@ Sistema completo de gestión empresarial diseñado específicamente para la oper
 
 ### Prerrequisitos
 
-- Node.js 18+ 
+- Node.js 18+
 - npm o yarn
-- Mock API corriendo (ver sección de desarrollo)
+
+Los datos se cargan desde archivos JSON estáticos en `public/api/` — no hace falta ningún servidor de API.
 
 ### Instalación
 
@@ -92,8 +93,7 @@ npm run preview
 
 1. Conecta tu repositorio en [Vercel](https://vercel.com)
 2. Vercel detectará automáticamente la configuración
-3. Agrega la variable de entorno `VITE_API_URL`
-4. ¡Despliega!
+3. ¡Despliega! (Los datos se sirven desde los JSON estáticos en `public/api/`)
 
 ### Opción 2: Desde CLI
 
@@ -173,44 +173,18 @@ frontend/
 - Gráficos interactivos
 - Sidebar colapsable
 
-## 🔌 Integración con API
+## 🔌 Datos (JSON estáticos)
 
-El frontend se conecta a una API REST. Por defecto, está configurado para usar:
+El frontend carga los datos desde archivos JSON en `public/api/`:
 
-- **Desarrollo**: `http://localhost:3001/api`
-- **Producción**: Configurar variable de entorno `VITE_API_URL`
+- **Dashboard**: `public/api/dashboard/stats.json`
+- **Pedidos**: `public/api/orders.json`
+- **Contabilidad**: `public/api/accounting/transactions.json`, `reports/balance.json`, `reports/income.json`
+- **Shopify**: `public/api/shopify/shops.json`, `sync-logs.json`
 
-### Configuración de Variables de Entorno
+El servicio `src/services/api.ts` hace `fetch` a estas rutas (p. ej. `/api/orders.json`). Filtros, paginación y búsqueda se aplican en el cliente. No hace falta servidor de API ni variables de entorno para desarrollo.
 
-Crea un archivo `.env` en la raíz del proyecto:
-
-```env
-VITE_API_URL=http://localhost:3001/api
-```
-
-Para producción en Vercel, configura la variable en el dashboard de Vercel.
-
-### Endpoints Principales
-
-```typescript
-// Dashboard
-GET /api/dashboard/stats
-
-// Pedidos
-GET /api/orders
-GET /api/orders/:id
-PATCH /api/orders/:id/status
-
-// Contabilidad
-GET /api/accounting/transactions
-GET /api/accounting/reports/balance
-GET /api/accounting/reports/income
-
-// Shopify
-GET /api/shopify/shops
-POST /api/shopify/shops/:id/sync
-GET /api/shopify/sync-logs
-```
+Cuando exista un backend real, se puede configurar `VITE_API_URL` y adaptar `api.ts` para apuntar a la API.
 
 ## 🧪 Desarrollo
 
@@ -226,17 +200,6 @@ npm run preview      # Preview de la build
 
 # Linting
 npm run lint         # Ejecuta ESLint
-```
-
-### Mock API para Desarrollo
-
-Para desarrollo local, se recomienda usar el Mock API incluido en el proyecto principal:
-
-```bash
-# En otro terminal
-cd ../mock-api
-npm install
-npm start
 ```
 
 ## 📱 Responsive Design
@@ -344,15 +307,13 @@ npm install
 # O cambiar en vite.config.ts
 ```
 
-### Error: API connection failed
-- Verificar que el Mock API esté corriendo
-- Verificar la URL en `.env` o variables de entorno de Vercel
-- Revisar CORS en el servidor API
+### Error: Los datos no cargan (404 en /api/*.json)
+- Verifica que existan los archivos en `public/api/` (orders.json, dashboard/stats.json, etc.)
+- En desarrollo, Vite sirve `public/` en la raíz; en build, se copian a `dist/`
 
 ### Error: Build failed en Vercel
 - Verificar que todas las dependencias estén en `package.json`
 - Revisar los logs en el dashboard de Vercel
-- Asegurarse de que `VITE_API_URL` esté configurada
 
 ## 📄 Licencia
 

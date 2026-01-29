@@ -1,6 +1,6 @@
 # 🚀 Guía de Despliegue en Vercel
 
-Esta guía te ayudará a desplegar el frontend de Monarch en Vercel de forma rápida y sencilla, **incluyendo la Mock API integrada**.
+Esta guía te ayudará a desplegar el frontend de Monarch en Vercel de forma rápida y sencilla. Los datos se sirven desde los **JSON estáticos** en `public/api/` (no hace falta API externa).
 
 ## 📋 Prerrequisitos
 
@@ -31,13 +31,11 @@ Si no se detecta automáticamente, configura manualmente:
 - Build Command: `npm run build`
 - Output Directory: `dist`
 
-### Paso 3: Variables de Entorno (Opcional)
+### Paso 3: Variables de Entorno
 
-**IMPORTANTE**: Si quieres usar la Mock API integrada (recomendado para demo), **NO necesitas configurar** `VITE_API_URL`. El frontend usará automáticamente las funciones serverless de Vercel.
+No es necesario configurar variables para el MVP. Los datos se cargan desde los JSON en `public/api/`, que Vercel sirve como estáticos (p. ej. `/api/orders.json`, `/api/dashboard/stats.json`).
 
-Si prefieres usar una API externa:
-- Agrega `VITE_API_URL` con la URL de tu API
-- Ejemplo: `https://api.monarch.com/api`
+Si en el futuro usas un backend real, puedes agregar `VITE_API_URL` con la URL de tu API.
 
 ### Paso 4: Desplegar
 
@@ -45,13 +43,6 @@ Si prefieres usar una API externa:
 2. Espera a que se complete el build (2-3 minutos)
 3. ¡Listo! Tu aplicación estará disponible en una URL como:
    `https://monarch-frontend.vercel.app`
-
-**La Mock API estará disponible automáticamente en:**
-- `https://monarch-frontend.vercel.app/api/orders`
-- `https://monarch-frontend.vercel.app/api/dashboard/stats`
-- `https://monarch-frontend.vercel.app/api/accounting/transactions`
-- `https://monarch-frontend.vercel.app/api/shopify/shops`
-- etc.
 
 ## 🛠️ Opción 2: Despliegue desde CLI
 
