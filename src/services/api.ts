@@ -347,6 +347,12 @@ export const accountingApi = {
     // In a real app, you might want to calculate this from transactions
     return createResponse(await loadJSON('/api/accounting/reports/income.json'))
   },
+  getEstadoResultados: async () => {
+    return createResponse(await loadJSON('/api/accounting/estado-resultados.json'))
+  },
+  getCuadroGeneral: async () => {
+    return createResponse(await loadJSON('/api/accounting/cuadro-general.json'))
+  },
 }
 
 export const shopifyApi = {

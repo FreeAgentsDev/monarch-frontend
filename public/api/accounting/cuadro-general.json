@@ -1,0 +1,48 @@
+{
+  "title": "CUADRO GENERAL - AÑO 2026",
+  "year": 2026,
+  "reportCurrency": "COP",
+  "exchangeRates": {
+    "USD": 3800,
+    "EUR": 4170,
+    "CLP": 4.2,
+    "DOP": 64,
+    "CRC": 7.2
+  },
+  "local": {
+    "columns": ["MES", "COLOMBIA (COP)", "ECUADOR (USD)", "ESPAÑA (EUR)", "CHILE (CLP)", "REP. DOM. (DOP)", "COSTA RICA (CRC)"],
+    "rows": [
+      { "mes": "ENERO", "colombia": 5000000, "ecuador": 2120, "espana": 1500, "chile": 2000000, "repDominicana": 150000, "costaRica": 500000 },
+      { "mes": "FEBRERO", "colombia": 15000000, "ecuador": 3500, "espana": 2700, "chile": 3500000, "repDominicana": 270000, "costaRica": 1000000 },
+      { "mes": "MARZO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "ABRIL", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "MAYO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "JUNIO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "JULIO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "AGOSTO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "SEPTIEMBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "OCTUBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "NOVIEMBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "DICIEMBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0 },
+      { "mes": "TOTAL", "colombia": 20000000, "ecuador": 5620, "espana": 4200, "chile": 5500000, "repDominicana": 420000, "costaRica": 1500000 }
+    ]
+  },
+  "pesos": {
+    "columns": ["MES", "COLOMBIA", "ECUADOR", "ESPAÑA", "CHILE", "REP. DOM.", "COSTA RICA", "TOTAL PESOS"],
+    "rows": [
+      { "mes": "ENERO", "colombia": 5000000, "ecuador": 8056000, "espana": 6255000, "chile": 8400000, "repDominicana": 9600000, "costaRica": 3600000, "totalPesos": 40752000 },
+      { "mes": "FEBRERO", "colombia": 15000000, "ecuador": 13300000, "espana": 11259000, "chile": 14700000, "repDominicana": 17280000, "costaRica": 7200000, "totalPesos": 78456000 },
+      { "mes": "MARZO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "ABRIL", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "MAYO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "JUNIO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "JULIO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "AGOSTO", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "SEPTIEMBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "OCTUBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "NOVIEMBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "DICIEMBRE", "colombia": 0, "ecuador": 0, "espana": 0, "chile": 0, "repDominicana": 0, "costaRica": 0, "totalPesos": 0 },
+      { "mes": "TOTAL", "colombia": 20000000, "ecuador": 21356000, "espana": 17514000, "chile": 23100000, "repDominicana": 26880000, "costaRica": 10800000, "totalPesos": 119208000 }
+    ]
+  }
+}

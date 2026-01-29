@@ -1,0 +1,71 @@
+{
+  "countries": [
+    {
+      "id": "co",
+      "name": "Colombia",
+      "currency": "COP",
+      "concepts": [
+        { "concept": "INGRESO DOLARES", "section": "ingresos", "enero": 7631, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 7631 },
+        { "concept": "INGRESOS PESOS", "section": "ingresos", "enero": 28997800, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 28997800 },
+        { "concept": "ENVIOS NACIONALES", "section": "ingresos", "enero": 1002, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 1002 },
+        { "concept": "PEDIDOS CANCELADO", "section": "ingresos", "enero": 0, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 0 },
+        { "concept": "INGRESOS DOLARES DP DE GASTOS TRANS", "section": "deducciones", "enero": 6629, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 6629 },
+        { "concept": "COMISION ENVIO", "section": "deducciones", "enero": 0, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 0 },
+        { "concept": "INGRESO DESPUES DE COMISION", "section": "deducciones", "enero": 6629, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 6629 },
+        { "concept": "DÓLAR CAMBIO", "section": "tipo_cambio", "enero": 3800, "febrero": 3800, "marzo": 3800, "abril": 3800, "mayo": 3800, "junio": 3800, "julio": 3800, "agosto": 3800, "septiembre": 3800, "octubre": 3800, "noviembre": 3800, "diciembre": 3800, "total": 3800 },
+        { "concept": "COSTO DOLARES", "section": "costos", "enero": 1800, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 1800 },
+        { "concept": "UTILIDAD BRUTA", "section": "utilidad_bruta", "enero": 4829, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 4829 },
+        { "concept": "MARGEN BRUTO", "section": "utilidad_bruta", "enero": 0.63, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 0.63 },
+        { "concept": "GASTOS ADM", "section": "gastos_adm", "enero": 3379, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 3379 },
+        { "concept": "SALARIOS", "section": "gastos_adm", "enero": 700, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 700 },
+        { "concept": "ARRIENDO", "section": "gastos_adm", "enero": 183, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 183 },
+        { "concept": "SHOPIFY + CELULARES", "section": "gastos_adm", "enero": 142, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 142 },
+        { "concept": "COMISIONES", "section": "gastos_adm", "enero": 0, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 0 },
+        { "concept": "OTROS", "section": "gastos_adm", "enero": 104, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 104 },
+        { "concept": "EMPAQUES", "section": "gastos_adm", "enero": 50, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 50 },
+        { "concept": "MENSUALIDAD EMPRESARIOS", "section": "gastos_adm", "enero": 100, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 100 },
+        { "concept": "UTILIDAD EMPRESARIOS", "section": "utilidad_empresarios", "enero": 570, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 570 },
+        { "concept": "UTILIDAD BRUTA + EMPRESARIOS", "section": "utilidad_empresarios", "enero": 5499, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 5499 },
+        { "concept": "GASTOS OPERACIONALES", "section": "gastos_operacionales", "enero": 0, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 0 },
+        { "concept": "UTILIDAD OPERACIONAL", "section": "utilidad_operacional", "enero": 2120, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 2120 },
+        { "concept": "MARGEN OPERACIONAL", "section": "utilidad_operacional", "enero": 0.28, "febrero": 0, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 0.28 }
+      ]
+    },
+    {
+      "id": "ec",
+      "name": "Ecuador",
+      "currency": "USD",
+      "concepts": [
+        { "concept": "INGRESO DOLARES", "section": "ingresos", "enero": 2120, "febrero": 1500, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 3620 },
+        { "concept": "INGRESOS PESOS", "section": "ingresos", "enero": 8162000, "febrero": 6675000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 14837000 },
+        { "concept": "UTILIDAD BRUTA", "section": "utilidad_bruta", "enero": 1250, "febrero": 980, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 2230 },
+        { "concept": "GASTOS ADM", "section": "gastos_adm", "enero": 909, "febrero": 909, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 1818 },
+        { "concept": "UTILIDAD OPERACIONAL", "section": "utilidad_operacional", "enero": 341, "febrero": 71, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 412 }
+      ]
+    },
+    {
+      "id": "es",
+      "name": "España",
+      "currency": "EUR",
+      "concepts": [
+        { "concept": "INGRESO DOLARES", "section": "ingresos", "enero": 2000000, "febrero": 3500000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 5500000 },
+        { "concept": "INGRESOS PESOS", "section": "ingresos", "enero": 8340000, "febrero": 14595000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 22935000 },
+        { "concept": "UTILIDAD BRUTA", "section": "utilidad_bruta", "enero": 1200000, "febrero": 2100000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 3300000 },
+        { "concept": "GASTOS ADM", "section": "gastos_adm", "enero": 420000, "febrero": 420000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 840000 },
+        { "concept": "UTILIDAD OPERACIONAL", "section": "utilidad_operacional", "enero": 780000, "febrero": 1680000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 2460000 }
+      ]
+    },
+    {
+      "id": "us",
+      "name": "Estados Unidos",
+      "currency": "USD",
+      "concepts": [
+        { "concept": "INGRESO DOLARES", "section": "ingresos", "enero": 5000000, "febrero": 15000000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 20000000 },
+        { "concept": "INGRESOS PESOS", "section": "ingresos", "enero": 40752000, "febrero": 78456000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 119208000 },
+        { "concept": "UTILIDAD BRUTA", "section": "utilidad_bruta", "enero": 3200000, "febrero": 9500000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 12700000 },
+        { "concept": "GASTOS ADM", "section": "gastos_adm", "enero": 268000, "febrero": 268000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 536000 },
+        { "concept": "UTILIDAD OPERACIONAL", "section": "utilidad_operacional", "enero": 2932000, "febrero": 9232000, "marzo": 0, "abril": 0, "mayo": 0, "junio": 0, "julio": 0, "agosto": 0, "septiembre": 0, "octubre": 0, "noviembre": 0, "diciembre": 0, "total": 12164000 }
+      ]
+    }
+  ]
+}
