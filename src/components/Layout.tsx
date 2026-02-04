@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { demoStorage } from '../utils/storage'
 import { 
   LayoutDashboard, 
   ShoppingBag, 
@@ -8,7 +9,11 @@ import {
   Menu,
   X,
   FileSpreadsheet,
-  BarChart3
+  BarChart3,
+  MapPin,
+  Users,
+  Settings,
+  Truck
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -23,9 +28,13 @@ export default function Layout({ children }: LayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Pedidos', href: '/orders', icon: ShoppingBag },
+    { name: 'Países', href: '/paises', icon: MapPin },
     { name: 'Contabilidad', href: '/contabilidad', icon: Calculator },
     { name: 'Estado de Resultados', href: '/contabilidad?tab=estado', icon: FileSpreadsheet },
     { name: 'Análisis de datos', href: '/analisis', icon: BarChart3 },
+    { name: 'Inversionistas', href: '/inversionistas', icon: Users },
+    { name: 'Rutas (Ecuador)', href: '/rutas-entregas', icon: Truck },
+    { name: 'Configuración', href: '/configuracion', icon: Settings },
     { name: 'Shopify', href: '/shopify', icon: Store },
   ]
 
@@ -95,9 +104,19 @@ export default function Layout({ children }: LayoutProps) {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 space-y-2">
+            <button
+              type="button"
+              onClick={() => {
+                demoStorage.clear()
+                window.location.reload()
+              }}
+              className="w-full text-xs text-amber-600 hover:text-amber-700 hover:underline"
+            >
+              Restaurar datos originales
+            </button>
             <div className="text-xs text-gray-500 text-center">
-              Sistema Monarch v1.0
+              Sistema Monarch v1.0 · Demo persistente
             </div>
           </div>
         </div>
