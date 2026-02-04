@@ -8,6 +8,12 @@ import EstadoDeResultados from './pages/EstadoDeResultados'
 import AnalisisDatos from './pages/AnalisisDatos'
 import Shopify from './pages/Shopify'
 import OrderDetail from './pages/OrderDetail'
+import Paises from './pages/Paises'
+import Inversionistas from './pages/Inversionistas'
+import GestionPaises from './pages/GestionPaises'
+import GestionInversionistas from './pages/GestionInversionistas'
+import RutasEntregas from './pages/RutasEntregas'
+import Configuracion from './pages/Configuracion'
 
 function App() {
   return (
@@ -23,6 +29,12 @@ function App() {
           <Route path="/estado-resultados" element={<EstadoDeResultados />} />
           <Route path="/analisis" element={<AnalisisDatos />} />
           <Route path="/shopify" element={<Shopify />} />
+          <Route path="/paises" element={<Paises />} />
+          <Route path="/gestion-paises" element={<GestionPaises />} />
+          <Route path="/inversionistas" element={<Inversionistas />} />
+          <Route path="/gestion-inversionistas" element={<GestionInversionistas />} />
+          <Route path="/rutas-entregas" element={<RutasEntregas />} />
+          <Route path="/configuracion" element={<Configuracion />} />
         </Routes>
       </Layout>
     </Router>
