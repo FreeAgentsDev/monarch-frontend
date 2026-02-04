@@ -1,5 +1,57 @@
 [
   {
+    "id": "shop-co",
+    "shopifyDomain": "monarch-colombia.myshopify.com",
+    "shopifyStoreName": "Monarch Colombia",
+    "countryCode": "CO",
+    "country": "Colombia",
+    "currency": "COP",
+    "timezone": "America/Bogota",
+    "isActive": true,
+    "lastSyncAt": "2024-01-22T10:00:00Z",
+    "syncStatus": "success",
+    "ordersCount": 312
+  },
+  {
+    "id": "shop-ec",
+    "shopifyDomain": "monarch-ecuador.myshopify.com",
+    "shopifyStoreName": "Monarch Ecuador",
+    "countryCode": "EC",
+    "country": "Ecuador",
+    "currency": "USD",
+    "timezone": "America/Guayaquil",
+    "isActive": true,
+    "lastSyncAt": "2024-01-22T09:45:00Z",
+    "syncStatus": "success",
+    "ordersCount": 189
+  },
+  {
+    "id": "shop-cl",
+    "shopifyDomain": "monarch-chile.myshopify.com",
+    "shopifyStoreName": "Monarch Chile",
+    "countryCode": "CL",
+    "country": "Chile",
+    "currency": "CLP",
+    "timezone": "America/Santiago",
+    "isActive": true,
+    "lastSyncAt": "2024-01-22T11:00:00Z",
+    "syncStatus": "success",
+    "ordersCount": 156
+  },
+  {
+    "id": "shop-do",
+    "shopifyDomain": "monarch-rd.myshopify.com",
+    "shopifyStoreName": "Monarch República Dominicana",
+    "countryCode": "DO",
+    "country": "República Dominicana",
+    "currency": "DOP",
+    "timezone": "America/Santo_Domingo",
+    "isActive": true,
+    "lastSyncAt": "2024-01-21T18:30:00Z",
+    "syncStatus": "success",
+    "ordersCount": 98
+  },
+  {
     "id": "shop1",
     "shopifyDomain": "monarch-usa.myshopify.com",
     "shopifyStoreName": "Monarch USA",
