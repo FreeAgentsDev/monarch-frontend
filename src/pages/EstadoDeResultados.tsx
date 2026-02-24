@@ -2,9 +2,10 @@ import { useEffect, useState, useMemo, Fragment, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { accountingApi } from '../services/api'
 import { demoStorage, STORAGE_KEYS } from '../utils/storage'
+import { usePaises } from '../hooks/usePaisesInversionistas'
 import { getExchangeRates } from '../components/contabilidad/ExchangeRatesConfig'
 import ExchangeRatesConfig from '../components/contabilidad/ExchangeRatesConfig'
-import { BarChart3, RotateCcw, Calculator, Pencil, Globe } from 'lucide-react'
+import { BarChart3, RotateCcw, Calculator, Pencil, Globe, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] as const
 const MESES_LABEL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -75,7 +76,53 @@ function convertToCOP(value: number, currency: string, rates: Record<string, num
   return value * rate
 }
 
+/** Crea una fila de concepto con todos los meses en 0 a partir de una plantilla */
+function emptyConceptsFromTemplate(template: ConceptRow[]): ConceptRow[] {
+  return template.map((row) => {
+    const r: ConceptRow = { concept: row.concept, section: row.section, total: 0 }
+    MESES.forEach((m) => { (r as Record<string, number>)[m] = 0 })
+    return r
+  })
+}
+
+function getDefaultConceptTemplate(): ConceptRow[] {
+  const rows: ConceptRow[] = [
+    { concept: 'INGRESO DOLARES', section: 'ingresos', total: 0 },
+    { concept: 'INGRESOS PESOS', section: 'ingresos', total: 0 },
+    { concept: 'UTILIDAD BRUTA', section: 'utilidad_bruta', total: 0 },
+    { concept: 'GASTOS ADM', section: 'gastos_adm', total: 0 },
+    { concept: 'UTILIDAD OPERACIONAL', section: 'utilidad_operacional', total: 0 },
+  ]
+  MESES.forEach((m) => {
+    rows.forEach((r) => { (r as Record<string, number>)[m] = 0 })
+  })
+  return rows
+}
+
+/** Fusiona países de la API con la lista completa de países configurados (Ecuador y todos) */
+function mergeCountriesWithPaises(
+  apiCountries: CountryData[],
+  paises: { codigo: string; nombre: string; moneda: string; orden?: number }[]
+): CountryData[] {
+  const byId = new Map<string, CountryData>()
+  apiCountries.forEach((c) => byId.set(c.id.toLowerCase(), c))
+  const template = apiCountries[0]?.concepts?.length ? apiCountries[0].concepts : getDefaultConceptTemplate()
+  const sortedPaises = [...paises].sort((a, b) => (a.orden ?? 99) - (b.orden ?? 99))
+  return sortedPaises.map((p) => {
+    const id = p.codigo.toLowerCase()
+    const existing = byId.get(id)
+    if (existing) return existing
+    return {
+      id,
+      name: p.nombre,
+      currency: p.moneda,
+      concepts: emptyConceptsFromTemplate(template),
+    }
+  })
+}
+
 export default function EstadoDeResultados() {
+  const { paises } = usePaises()
   const [data, setData] = useState<EstadoResultadosData | null>(null)
   const [editableData, setEditableData] = useState<EstadoResultadosData | null>(null)
   const [countryId, setCountryId] = useState<string>('')
@@ -84,16 +131,21 @@ export default function EstadoDeResultados() {
   const [editedCells, setEditedCells] = useState<Set<string>>(new Set())
   const [viewMode, setViewMode] = useState<'por-pais' | 'consolidado'>('por-pais')
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(() => getExchangeRates())
+  const [showFormulas, setShowFormulas] = useState(false)
 
   useEffect(() => {
     accountingApi.getEstadoResultados().then((res) => {
       const payload = res.data as EstadoResultadosData
-      setData(payload)
+      const merged = {
+        countries: mergeCountriesWithPaises(payload?.countries ?? [], paises),
+      }
+      setData(merged)
       const stored = demoStorage.get<EstadoResultadosData>(STORAGE_KEYS.ESTADO_RESULTADOS)
-      setEditableData(stored?.countries?.length ? deepCloneData(stored) : deepCloneData(payload))
-      if (payload?.countries?.length) setCountryId(payload.countries[0].id)
+      const toUse = stored?.countries?.length ? deepCloneData(stored) : deepCloneData(merged)
+      setEditableData(toUse)
+      if (toUse?.countries?.length) setCountryId(toUse.countries[0].id)
     }).catch(console.error).finally(() => setLoading(false))
-  }, [])
+  }, [paises])
 
   const handleCellChange = useCallback((countryId: string, conceptIdx: number, mes: typeof MESES[number], value: number | '') => {
     setEditableData((prev) => {
@@ -252,6 +304,15 @@ export default function EstadoDeResultados() {
             <Calculator size={14} />
             Total = Σ 12 meses
           </div>
+          <button
+            type="button"
+            onClick={() => setShowFormulas((v) => !v)}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm hover:bg-gray-50"
+          >
+            <HelpCircle size={16} />
+            Fórmulas
+            {showFormulas ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
           <Link
             to="/analisis"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
@@ -261,6 +322,21 @@ export default function EstadoDeResultados() {
           </Link>
         </div>
       </div>
+
+      {showFormulas && (
+        <div className="card bg-slate-50 border-slate-200">
+          <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <Calculator size={18} />
+            Fórmulas utilizadas
+          </h3>
+          <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+            <li><strong>Total por concepto:</strong> Total = Enero + Febrero + … + Diciembre</li>
+            <li><strong>Consolidado (COP):</strong> Valor en COP = Valor en moneda local × Tipo de cambio a COP</li>
+            <li><strong>Total consolidado:</strong> Suma de todos los países convertidos a COP (margenes: promedio)</li>
+            <li><strong>Margen %:</strong> Se edita en porcentaje (ej. 28); se guarda como decimal (0,28)</li>
+          </ul>
+        </div>
+      )}
 
       <ExchangeRatesConfig onRatesChange={setExchangeRates} />
 

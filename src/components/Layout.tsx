@@ -1,10 +1,11 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { demoStorage } from '../utils/storage'
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  Calculator, 
+import { useAuth, type Role } from '../context/AuthContext'
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Calculator,
   Store,
   Menu,
   X,
@@ -13,30 +14,40 @@ import {
   MapPin,
   Users,
   Settings,
-  Truck
+  Truck,
+  UserCircle,
+  ChevronDown,
 } from 'lucide-react'
-import { useState } from 'react'
 
 interface LayoutProps {
   children: ReactNode
 }
 
+const ALL_NAV: { name: string; href: string; icon: typeof LayoutDashboard; roles: Role[] }[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['superadmin', 'administrador'] },
+  { name: 'Pedidos', href: '/orders', icon: ShoppingBag, roles: ['superadmin', 'administrador'] },
+  { name: 'Países', href: '/paises', icon: MapPin, roles: ['superadmin', 'administrador', 'inversionista'] },
+  { name: 'Contabilidad', href: '/contabilidad', icon: Calculator, roles: ['superadmin', 'administrador'] },
+  { name: 'Estado de Resultados', href: '/estado-resultados', icon: FileSpreadsheet, roles: ['superadmin', 'administrador'] },
+  { name: 'Análisis de datos', href: '/analisis', icon: BarChart3, roles: ['superadmin', 'administrador', 'inversionista'] },
+  { name: 'Inversionistas', href: '/inversionistas', icon: Users, roles: ['superadmin', 'administrador', 'inversionista'] },
+  { name: 'Vista por país (catálogo)', href: '/inversionistas/vista/EC', icon: Store, roles: ['superadmin', 'administrador', 'inversionista'] },
+  { name: 'Avance de la semana', href: '/avance-semana', icon: BarChart3, roles: ['superadmin', 'administrador', 'inversionista', 'empresario'] },
+  { name: 'Mis pedidos (empresarios)', href: '/empresarios/pedidos', icon: ShoppingBag, roles: ['superadmin', 'administrador', 'empresario'] },
+  { name: 'Rutas (Ecuador)', href: '/rutas-entregas', icon: Truck, roles: ['superadmin', 'administrador'] },
+  { name: 'Gestionar países', href: '/gestion-paises', icon: MapPin, roles: ['superadmin', 'administrador'] },
+  { name: 'Gestionar inversionistas', href: '/gestion-inversionistas', icon: Users, roles: ['superadmin', 'administrador'] },
+  { name: 'Configuración', href: '/configuracion', icon: Settings, roles: ['superadmin', 'administrador'] },
+  { name: 'Shopify', href: '/shopify', icon: Store, roles: ['superadmin', 'administrador'] },
+]
+
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false)
+  const { user, role, setRole } = useAuth()
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Pedidos', href: '/orders', icon: ShoppingBag },
-    { name: 'Países', href: '/paises', icon: MapPin },
-    { name: 'Contabilidad', href: '/contabilidad', icon: Calculator },
-    { name: 'Estado de Resultados', href: '/contabilidad?tab=estado', icon: FileSpreadsheet },
-    { name: 'Análisis de datos', href: '/analisis', icon: BarChart3 },
-    { name: 'Inversionistas', href: '/inversionistas', icon: Users },
-    { name: 'Rutas (Ecuador)', href: '/rutas-entregas', icon: Truck },
-    { name: 'Configuración', href: '/configuracion', icon: Settings },
-    { name: 'Shopify', href: '/shopify', icon: Store },
-  ]
+  const navigation = ALL_NAV.filter((item) => item.roles.includes(role))
 
   const tab = new URLSearchParams(location.search).get('tab')
   const isActive = (path: string) => {
@@ -44,7 +55,16 @@ export default function Layout({ children }: LayoutProps) {
       if (path === '/contabilidad') return tab !== 'estado'
       if (path.includes('tab=estado')) return tab === 'estado'
     }
-    return location.pathname === path.split('?')[0]
+    const pathBase = path.split('?')[0]
+    if (pathBase === '/inversionistas/vista') return location.pathname.startsWith('/inversionistas/vista')
+    return location.pathname === pathBase
+  }
+
+  const roleLabels: Record<Role, string> = {
+    superadmin: 'Superadmin',
+    administrador: 'Administrador',
+    inversionista: 'Inversionista',
+    empresario: 'Empresario',
   }
 
   return (
@@ -134,8 +154,33 @@ export default function Layout({ children }: LayoutProps) {
           </button>
           <div className="flex-1" />
           <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-600">
-              Bienvenido, <span className="font-medium">Admin</span>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setRoleDropdownOpen((v) => !v)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <UserCircle size={18} />
+                {user?.name ?? 'Usuario'} · <span className="font-medium">{roleLabels[role]}</span>
+                <ChevronDown size={16} />
+              </button>
+              {roleDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setRoleDropdownOpen(false)} />
+                  <div className="absolute right-0 mt-1 py-1 w-48 bg-white rounded-lg border border-gray-200 shadow-lg z-20">
+                    {(['superadmin', 'administrador', 'inversionista', 'empresario'] as Role[]).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => { setRole(r); setRoleDropdownOpen(false) }}
+                        className={`w-full text-left px-4 py-2 text-sm ${role === r ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        {roleLabels[r]}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>

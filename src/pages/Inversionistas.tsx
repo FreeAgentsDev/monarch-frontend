@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Package, BarChart3, Lock, BookOpen, ShoppingBag, Settings } from 'lucide-react'
+import { Package, BarChart3, Lock, BookOpen, ShoppingBag, Settings, FileDown } from 'lucide-react'
 import { usePaises } from '../hooks/usePaisesInversionistas'
 
 export default function Inversionistas() {
@@ -41,12 +41,24 @@ export default function Inversionistas() {
             </div>
             <div>
               <h2 className="font-semibold text-gray-900">Catálogo independiente</h2>
-              <p className="text-sm text-gray-500">Precios por país</p>
+              <p className="text-sm text-gray-500">Precios por país · Descarga con o sin precios</p>
             </div>
           </div>
-          <p className="text-gray-600 text-sm">
-            Catálogo independiente con precios específicos de cada país. Cada mercado tiene sus propias condiciones de mayorista.
+          <p className="text-gray-600 text-sm mb-4">
+            Catálogo independiente con precios específicos de cada país. Cada mercado tiene su propia vista; descarga al por mayor o sin precios para compartir.
           </p>
+          <div className="flex flex-wrap gap-2">
+            {paises.filter((p) => p.activo).map((p) => (
+              <Link
+                key={p.id}
+                to={`/inversionistas/vista/${p.codigo}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-sm font-medium hover:bg-primary-100"
+              >
+                <FileDown size={14} />
+                {p.nombre}
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="card">

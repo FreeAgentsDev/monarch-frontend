@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { RotateCcw, Pencil, Calculator } from 'lucide-react'
+import { RotateCcw, Pencil, Calculator, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { demoStorage, STORAGE_KEYS } from '../../utils/storage'
 import { getExchangeRates } from './ExchangeRatesConfig'
 import ExchangeRatesConfig from './ExchangeRatesConfig'
@@ -83,6 +83,7 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
   })
   const [editedCells, setEditedCells] = useState<Set<string>>(new Set())
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(() => getExchangeRates())
+  const [showFormulas, setShowFormulas] = useState(false)
 
   const recalcPesosFromRates = useCallback(() => {
     const local = editableData.local
@@ -173,6 +174,15 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
             <Calculator size={12} />
             Total = Σ países
           </div>
+          <button
+            type="button"
+            onClick={() => setShowFormulas((v) => !v)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 text-xs hover:bg-gray-50"
+          >
+            <HelpCircle size={14} />
+            Fórmulas
+            {showFormulas ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
           {editableData.local?.rows?.length && (
             <button
               type="button"
@@ -206,6 +216,21 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
         )}
         </div>
       </div>
+
+      {showFormulas && (
+        <div className="card bg-slate-50 border-slate-200 py-3 px-4">
+          <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-sm">
+            <Calculator size={16} />
+            Fórmulas del cuadro
+          </h3>
+          <ul className="text-xs text-gray-700 space-y-1 list-disc list-inside">
+            <li><strong>TOTAL (fila):</strong> Suma de los 12 meses por fila</li>
+            <li><strong>TOTAL PESOS (columna):</strong> Suma de todos los países por mes/fila</li>
+            <li><strong>Convertido a pesos:</strong> Valor local × Tipo de cambio (COP)</li>
+            <li><strong>Recalcular pesos:</strong> Aplica tipos de cambio actuales a la vista “Moneda local”</li>
+          </ul>
+        </div>
+      )}
 
       <ExchangeRatesConfig onRatesChange={setExchangeRates} compact />
 
