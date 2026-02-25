@@ -68,10 +68,9 @@ export function useAuth() {
 }
 
 export function canAccess(role: Role, path: string): boolean {
-  const adminPaths = ['/dashboard', '/orders', '/accounting', '/contabilidad', '/estado-resultados', '/analisis', '/shopify', '/configuracion', '/gestion-paises', '/gestion-inversionistas']
+  const adminPaths = ['/dashboard', '/orders', '/accounting', '/contabilidad', '/estado-resultados', '/analisis', '/shopify', '/configuracion', '/gestion-paises', '/gestion-inversionistas', '/rutas-entregas']
   const inversionistaPaths = ['/inversionistas', '/inversionistas/vista', '/paises', '/avance-semana']
   const empresarioPaths = ['/empresarios', '/empresarios/pedidos', '/avance-semana']
-  const publicPaths = ['/rutas-entregas']
 
   if (role === 'superadmin') return true
   if (role === 'administrador') return adminPaths.some((p) => path.startsWith(p)) || path === '/paises' || path === '/inversionistas' || path.startsWith('/inversionistas/') || path === '/avance-semana'

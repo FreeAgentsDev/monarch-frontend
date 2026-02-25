@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
+import RoleAwareRedirect from './components/RoleAwareRedirect'
 import Dashboard from './pages/Dashboard'
 import Orders from './pages/Orders'
 import Accounting from './pages/Accounting'
@@ -25,25 +27,25 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/orders/:id" element={<OrderDetail />} />
-            <Route path="/accounting" element={<Accounting />} />
-            <Route path="/contabilidad" element={<ContabilidadHub />} />
-            <Route path="/estado-resultados" element={<EstadoDeResultados />} />
-            <Route path="/analisis" element={<AnalisisDatos />} />
-            <Route path="/shopify" element={<Shopify />} />
-            <Route path="/paises" element={<Paises />} />
-            <Route path="/gestion-paises" element={<GestionPaises />} />
-            <Route path="/inversionistas" element={<Inversionistas />} />
-            <Route path="/inversionistas/vista/:paisCodigo" element={<VistaInversionista />} />
+            <Route path="/" element={<RoleAwareRedirect />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+            <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+            <Route path="/accounting" element={<ProtectedRoute><Accounting /></ProtectedRoute>} />
+            <Route path="/contabilidad" element={<ProtectedRoute><ContabilidadHub /></ProtectedRoute>} />
+            <Route path="/estado-resultados" element={<ProtectedRoute><EstadoDeResultados /></ProtectedRoute>} />
+            <Route path="/analisis" element={<ProtectedRoute><AnalisisDatos /></ProtectedRoute>} />
+            <Route path="/shopify" element={<ProtectedRoute><Shopify /></ProtectedRoute>} />
+            <Route path="/paises" element={<ProtectedRoute><Paises /></ProtectedRoute>} />
+            <Route path="/gestion-paises" element={<ProtectedRoute><GestionPaises /></ProtectedRoute>} />
+            <Route path="/inversionistas" element={<ProtectedRoute><Inversionistas /></ProtectedRoute>} />
+            <Route path="/inversionistas/vista/:paisCodigo" element={<ProtectedRoute><VistaInversionista /></ProtectedRoute>} />
             <Route path="/inversionistas/vista" element={<Navigate to="/inversionistas/vista/EC" replace />} />
-            <Route path="/gestion-inversionistas" element={<GestionInversionistas />} />
-            <Route path="/empresarios/pedidos" element={<EmpresariosPedidos />} />
-            <Route path="/avance-semana" element={<AvanceSemana />} />
-            <Route path="/rutas-entregas" element={<RutasEntregas />} />
-            <Route path="/configuracion" element={<Configuracion />} />
+            <Route path="/gestion-inversionistas" element={<ProtectedRoute><GestionInversionistas /></ProtectedRoute>} />
+            <Route path="/empresarios/pedidos" element={<ProtectedRoute><EmpresariosPedidos /></ProtectedRoute>} />
+            <Route path="/avance-semana" element={<ProtectedRoute><AvanceSemana /></ProtectedRoute>} />
+            <Route path="/rutas-entregas" element={<ProtectedRoute><RutasEntregas /></ProtectedRoute>} />
+            <Route path="/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
           </Routes>
         </Layout>
       </Router>
