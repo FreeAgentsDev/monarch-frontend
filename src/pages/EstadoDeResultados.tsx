@@ -80,7 +80,7 @@ function convertToCOP(value: number, currency: string, rates: Record<string, num
 function emptyConceptsFromTemplate(template: ConceptRow[]): ConceptRow[] {
   return template.map((row) => {
     const r: ConceptRow = { concept: row.concept, section: row.section, total: 0 }
-    MESES.forEach((m) => { (r as Record<string, number>)[m] = 0 })
+    MESES.forEach((m) => { (r as unknown as Record<string, number>)[m] = 0 })
     return r
   })
 }
@@ -94,7 +94,7 @@ function getDefaultConceptTemplate(): ConceptRow[] {
     { concept: 'UTILIDAD OPERACIONAL', section: 'utilidad_operacional', total: 0 },
   ]
   MESES.forEach((m) => {
-    rows.forEach((r) => { (r as Record<string, number>)[m] = 0 })
+    rows.forEach((r) => { (r as unknown as Record<string, number>)[m] = 0 })
   })
   return rows
 }

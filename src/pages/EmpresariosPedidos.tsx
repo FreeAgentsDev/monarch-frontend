@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ordersApi } from '../services/api'
 import type { Order } from '../services/api'
-import { ShoppingBag, Plus, ArrowLeft, Package } from 'lucide-react'
+import { Plus, ArrowLeft, Package } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export default function EmpresariosPedidos() {
