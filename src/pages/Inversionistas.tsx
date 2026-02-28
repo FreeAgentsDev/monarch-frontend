@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Package, BarChart3, Lock, BookOpen, ShoppingBag, Settings, FileDown } from 'lucide-react'
+import { Package, BarChart3, Lock, BookOpen, ShoppingBag, Settings, FileDown, LayoutGrid } from 'lucide-react'
 import { usePaises } from '../hooks/usePaisesInversionistas'
 
 export default function Inversionistas() {
@@ -129,13 +129,25 @@ export default function Inversionistas() {
         </div>
       </div>
 
-      <div className="card bg-primary-50 border-primary-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="card border border-gray-200 bg-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p className="text-sm text-gray-700">
+          <strong>Panel de gestión:</strong> Historial de pedidos, crear pedido, contabilidad y transportadoras.
+        </p>
+        <Link
+          to="/inversionistas/panel"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 whitespace-nowrap self-start sm:self-auto"
+        >
+          <LayoutGrid size={18} />
+          Panel de gestión
+        </Link>
+      </div>
+      <div className="card border border-gray-200 bg-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <p className="text-sm text-gray-700">
           <strong>Gestión completa:</strong> Crea inversionistas, asígnales países y vincula sus tiendas Shopify por país.
         </p>
         <Link
           to="/gestion-inversionistas"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 whitespace-nowrap self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-white whitespace-nowrap self-start sm:self-auto"
         >
           <Settings size={18} />
           Gestionar inversionistas
