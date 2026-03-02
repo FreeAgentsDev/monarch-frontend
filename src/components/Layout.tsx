@@ -17,6 +17,7 @@ import {
   Truck,
   UserCircle,
   ChevronDown,
+  Shield,
 } from 'lucide-react'
 
 interface LayoutProps {
