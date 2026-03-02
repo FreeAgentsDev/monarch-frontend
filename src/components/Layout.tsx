@@ -1,10 +1,9 @@
-import { FormEvent, ReactNode, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { demoStorage } from '../utils/storage'
 import { useAuth, type Role } from '../context/AuthContext'
 import {
   LayoutDashboard,
-  LayoutGrid,
   ShoppingBag,
   Calculator,
   Store,
@@ -18,9 +17,6 @@ import {
   Truck,
   UserCircle,
   ChevronDown,
-  LogOut,
-  Lock,
-  User,
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -35,7 +31,6 @@ const ALL_NAV: { name: string; href: string; icon: typeof LayoutDashboard; roles
   { name: 'Estado de Resultados', href: '/estado-resultados', icon: FileSpreadsheet, roles: ['superadmin', 'administrador'] },
   { name: 'Análisis de datos', href: '/analisis', icon: BarChart3, roles: ['superadmin', 'administrador', 'inversionista'] },
   { name: 'Inversionistas', href: '/inversionistas', icon: Users, roles: ['superadmin', 'administrador', 'inversionista'] },
-  { name: 'Panel Inversionista', href: '/inversionistas/panel', icon: LayoutGrid, roles: ['superadmin', 'administrador', 'inversionista'] },
   { name: 'Vista por país (catálogo)', href: '/inversionistas/vista/EC', icon: Store, roles: ['superadmin', 'administrador', 'inversionista'] },
   { name: 'Avance de la semana', href: '/avance-semana', icon: BarChart3, roles: ['superadmin', 'administrador', 'inversionista', 'empresario'] },
   { name: 'Mis pedidos (empresarios)', href: '/empresarios/pedidos', icon: ShoppingBag, roles: ['superadmin', 'administrador', 'empresario'] },
@@ -50,11 +45,7 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false)
-  const [switchRoleModal, setSwitchRoleModal] = useState<Role | null>(null)
-  const [switchUsername, setSwitchUsername] = useState('')
-  const [switchPassword, setSwitchPassword] = useState('')
-  const [switchError, setSwitchError] = useState('')
-  const { user, role, loginAsRole, logout } = useAuth()
+  const { user, role, setRole } = useAuth()
 
   const navigation = ALL_NAV.filter((item) => item.roles.includes(role))
 
@@ -176,40 +167,17 @@ export default function Layout({ children }: LayoutProps) {
               {roleDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setRoleDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-1 py-1 w-52 bg-white rounded-xl border border-gray-200 shadow-lg z-20">
-                    <div className="px-3 py-2 border-b border-gray-100">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Rol actual</p>
-                      <p className="text-sm font-semibold text-gray-900 mt-0.5">{roleLabels[role]}</p>
-                    </div>
-                    <div className="py-1">
-                      {(['superadmin', 'administrador', 'inversionista', 'empresario'] as Role[]).map((r) => (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => {
-                            setRoleDropdownOpen(false)
-                            if (r === role) return
-                            setSwitchRoleModal(r)
-                            setSwitchUsername('')
-                            setSwitchPassword('')
-                            setSwitchError('')
-                          }}
-                          className={`w-full text-left px-4 py-2.5 text-sm ${role === r ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
-                        >
-                          {roleLabels[r]}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="border-t border-gray-100 pt-1">
+                  <div className="absolute right-0 mt-1 py-1 w-48 bg-white rounded-lg border border-gray-200 shadow-lg z-20">
+                    {(['superadmin', 'administrador', 'inversionista', 'empresario'] as Role[]).map((r) => (
                       <button
+                        key={r}
                         type="button"
-                        onClick={() => { logout(); setRoleDropdownOpen(false) }}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium"
+                        onClick={() => { setRole(r); setRoleDropdownOpen(false) }}
+                        className={`w-full text-left px-4 py-2 text-sm ${role === r ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
                       >
-                        <LogOut size={16} />
-                        Cerrar sesión
+                        {roleLabels[r]}
                       </button>
-                    </div>
+                    ))}
                   </div>
                 </>
               )}
@@ -220,96 +188,6 @@ export default function Layout({ children }: LayoutProps) {
         {/* Page content */}
         <main className="p-6">{children}</main>
       </div>
-
-      {/* Modal: Iniciar sesión como otro rol */}
-      {switchRoleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Iniciar sesión como {roleLabels[switchRoleModal]}
-              </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setSwitchRoleModal(null)
-                  setSwitchError('')
-                }}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                aria-label="Cerrar"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <form
-              onSubmit={(e: FormEvent) => {
-                e.preventDefault()
-                setSwitchError('')
-                const result = loginAsRole(switchRoleModal, switchUsername, switchPassword)
-                if (result.ok) {
-                  setSwitchRoleModal(null)
-                  setSwitchUsername('')
-                  setSwitchPassword('')
-                } else {
-                  setSwitchError(result.error ?? 'Error al iniciar sesión.')
-                }
-              }}
-              className="p-6 space-y-4"
-            >
-              {switchError && (
-                <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
-                  {switchError}
-                </div>
-              )}
-              <div>
-                <label htmlFor="switch-user" className="block text-sm font-medium text-gray-700 mb-1.5">Usuario</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    id="switch-user"
-                    type="text"
-                    autoComplete="username"
-                    value={switchUsername}
-                    onChange={(e) => setSwitchUsername(e.target.value)}
-                    placeholder="Usuario de este rol"
-                    className="input pl-9"
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="switch-password" className="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    id="switch-password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={switchPassword}
-                    onChange={(e) => setSwitchPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="input pl-9"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="submit" className="btn-primary flex-1 justify-center">
-                  Entrar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSwitchRoleModal(null)
-                    setSwitchError('')
-                  }}
-                  className="btn-secondary"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

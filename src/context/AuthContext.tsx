@@ -16,6 +16,8 @@ interface AuthContextValue {
   setUser: (u: User | null) => void
   setRole: (r: Role) => void
   logout: () => void
+  login: (username: string, password: string) => { ok: boolean; error?: string }
+  loginAsRole: (role: Role, username: string, password: string) => { ok: boolean; error?: string }
 }
 
 const defaultUser: User = {
@@ -46,6 +48,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRoleState('administrador')
   }, [])
 
+  const login = useCallback((username: string, password: string): { ok: boolean; error?: string } => {
+    const creds: Record<string, string> = {
+      superadmin: 'superadmin123',
+      admin: 'admin123',
+      inversionista: 'inversionista123',
+      empresario: 'empresario123',
+    }
+    const pwd = creds[username.toLowerCase()]
+    if (!pwd || pwd !== password) return { ok: false, error: 'Usuario o contraseña incorrectos' }
+    const roleMap: Record<string, Role> = {
+      superadmin: 'superadmin',
+      admin: 'administrador',
+      inversionista: 'inversionista',
+      empresario: 'empresario',
+    }
+    const r = roleMap[username.toLowerCase()] ?? 'administrador'
+    setUserState({ id: '1', name: username, email: `${username}@monarch.com`, role: r })
+    setRoleState(r)
+    return { ok: true }
+  }, [])
+
+  const loginAsRole = useCallback((r: Role, username: string, password: string): { ok: boolean; error?: string } => {
+    const res = login(username, password)
+    if (!res.ok) return res
+    setRoleState(r)
+    setUserState((prev) => (prev ? { ...prev, role: r } : null))
+    return { ok: true }
+  }, [login])
+
   return (
     <AuthContext.Provider
       value={{
@@ -54,6 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser,
         setRole,
         logout,
+        login,
+        loginAsRole,
       }}
     >
       {children}
@@ -68,12 +101,10 @@ export function useAuth() {
 }
 
 export function canAccess(role: Role, path: string): boolean {
-  const adminPaths = ['/dashboard', '/orders', '/accounting', '/contabilidad', '/estado-resultados', '/analisis', '/shopify', '/configuracion', '/gestion-paises', '/gestion-inversionistas', '/rutas-entregas']
   const inversionistaPaths = ['/inversionistas', '/inversionistas/vista', '/paises', '/avance-semana']
   const empresarioPaths = ['/empresarios', '/empresarios/pedidos', '/avance-semana']
 
-  if (role === 'superadmin') return true
-  if (role === 'administrador') return adminPaths.some((p) => path.startsWith(p)) || path === '/paises' || path === '/inversionistas' || path.startsWith('/inversionistas/') || path === '/avance-semana'
+  if (role === 'superadmin' || role === 'administrador') return true
   if (role === 'inversionista') return inversionistaPaths.some((p) => path.startsWith(p)) || path === '/avance-semana'
   if (role === 'empresario') return empresarioPaths.some((p) => path.startsWith(p)) || path === '/avance-semana'
   return false
