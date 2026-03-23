@@ -16,6 +16,7 @@ import Inversionistas from './pages/Inversionistas'
 import VistaInversionista from './pages/VistaInversionista'
 import GestionPaises from './pages/GestionPaises'
 import GestionInversionistas from './pages/GestionInversionistas'
+import GestionUsuarios from './pages/GestionUsuarios'
 import RutasEntregas from './pages/RutasEntregas'
 import Configuracion from './pages/Configuracion'
 import EmpresariosPedidos from './pages/EmpresariosPedidos'
@@ -42,6 +43,7 @@ function App() {
             <Route path="/inversionistas/vista/:paisCodigo" element={<ProtectedRoute><VistaInversionista /></ProtectedRoute>} />
             <Route path="/inversionistas/vista" element={<Navigate to="/inversionistas/vista/EC" replace />} />
             <Route path="/gestion-inversionistas" element={<ProtectedRoute><GestionInversionistas /></ProtectedRoute>} />
+            <Route path="/gestion-usuarios" element={<ProtectedRoute><GestionUsuarios /></ProtectedRoute>} />
             <Route path="/empresarios/pedidos" element={<ProtectedRoute><EmpresariosPedidos /></ProtectedRoute>} />
             <Route path="/avance-semana" element={<ProtectedRoute><AvanceSemana /></ProtectedRoute>} />
             <Route path="/rutas-entregas" element={<ProtectedRoute><RutasEntregas /></ProtectedRoute>} />
