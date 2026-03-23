@@ -7,8 +7,10 @@ import {
   FileSpreadsheet,
   Activity,
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  Shield
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { dashboardApi, ordersApi, accountingApi, DashboardStats, Order, Transaction as TransactionType } from '../services/api'
 import { demoStorage, STORAGE_KEYS } from '../utils/storage'
 import { format } from 'date-fns'
@@ -44,6 +46,7 @@ function formatNum(n: number) {
 }
 
 export default function Dashboard() {
+  const { role } = useAuth()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [cuadro, setCuadro] = useState<CuadroGeneral | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
@@ -333,7 +336,7 @@ export default function Dashboard() {
       </div>
 
       {/* Accesos rápidos */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Link to="/orders" className="card hover:shadow-lg transition-shadow flex items-center gap-4">
           <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
             <ShoppingBag className="w-6 h-6 text-blue-600" />
@@ -361,6 +364,17 @@ export default function Dashboard() {
             <p className="text-sm text-gray-500">Gráficas y tendencias</p>
           </div>
         </Link>
+        {(role === 'administrador' || role === 'superadmin') && (
+          <Link to="/gestion-usuarios" className="card hover:shadow-lg transition-shadow flex items-center gap-4">
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+              <Shield className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Gestión de usuarios</h3>
+              <p className="text-sm text-gray-500">Administrar roles y accesos</p>
+            </div>
+          </Link>
+        )}
       </div>
 
       {/* Pedidos recientes */}

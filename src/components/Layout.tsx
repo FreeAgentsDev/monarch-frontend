@@ -17,6 +17,7 @@ import {
   Truck,
   UserCircle,
   ChevronDown,
+  Shield,
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -37,6 +38,7 @@ const ALL_NAV: { name: string; href: string; icon: typeof LayoutDashboard; roles
   { name: 'Rutas (Ecuador)', href: '/rutas-entregas', icon: Truck, roles: ['superadmin', 'administrador'] },
   { name: 'Gestionar países', href: '/gestion-paises', icon: MapPin, roles: ['superadmin', 'administrador'] },
   { name: 'Gestionar inversionistas', href: '/gestion-inversionistas', icon: Users, roles: ['superadmin', 'administrador'] },
+  { name: 'Gestión de usuarios', href: '/gestion-usuarios', icon: Shield, roles: ['superadmin', 'administrador'] },
   { name: 'Configuración', href: '/configuracion', icon: Settings, roles: ['superadmin', 'administrador'] },
   { name: 'Shopify', href: '/shopify', icon: Store, roles: ['superadmin', 'administrador'] },
 ]
