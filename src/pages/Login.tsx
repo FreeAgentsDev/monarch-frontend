@@ -107,7 +107,14 @@ export default function Login() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <div className="mt-6 rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-left text-xs text-gray-600 max-w-md mx-auto space-y-1">
+          <p className="font-semibold text-gray-800">Credenciales (demo)</p>
+          <p>Usuario = nombre del rol o cuenta. Contraseña = mismo nombre + <strong>123</strong>.</p>
+          <p>Ej.: <code className="rounded bg-gray-100 px-1">empresario</code> / <code className="rounded bg-gray-100 px-1">empresario123</code></p>
+          <p className="text-gray-500">superadmin · admin · inversionista · empresario</p>
+        </div>
+
+        <p className="text-center text-sm text-gray-500 mt-4">
           Monarch v1.0
         </p>
       </div>
