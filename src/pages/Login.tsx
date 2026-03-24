@@ -1,28 +1,41 @@
 import { useState, FormEvent } from 'react'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { Lock, User, LogIn } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth, type Role } from '../context/AuthContext'
+
+const HOME_BY_ROLE: Record<Role, string> = {
+  superadmin: '/dashboard',
+  administrador: '/dashboard',
+  inversionista: '/inversionistas/panel',
+  empresario: '/avance-semana',
+}
 
 export default function Login() {
-  const { login } = useAuth()
+  const { loginWithCredentials, user, role } = useAuth()
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  if (user) return <Navigate to={HOME_BY_ROLE[role]} replace />
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const result = login(username, password)
+    const result = loginWithCredentials(username, password)
     setLoading(false)
-    if (result.ok) return
+    if (result.ok && result.role) {
+      navigate(HOME_BY_ROLE[result.role], { replace: true })
+      return
+    }
     setError(result.error ?? 'Error al iniciar sesión.')
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Card */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-200/50 overflow-hidden">
           <div className="px-8 pt-10 pb-2 text-center border-b border-gray-100">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-600 text-white mb-5">
@@ -53,7 +66,7 @@ export default function Login() {
                   autoComplete="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Ej. admin, inversionista..."
+                  placeholder="Usuario"
                   className="input pl-10"
                 />
               </div>
@@ -92,16 +105,17 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          <div className="px-8 pb-6 pt-0">
-            <p className="text-xs text-gray-400 text-center">
-              Demo: superadmin / superadmin123 · admin / admin123 · inversionista / inversionista123 · empresario / empresario123
-            </p>
-          </div>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Monarch v1.0 · Acceso por usuario y contraseña
+        <div className="mt-6 rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-left text-xs text-gray-600 max-w-md mx-auto space-y-1">
+          <p className="font-semibold text-gray-800">Credenciales (demo)</p>
+          <p>Usuario = nombre del rol o cuenta. Contraseña = mismo nombre + <strong>123</strong>.</p>
+          <p>Ej.: <code className="rounded bg-gray-100 px-1">empresario</code> / <code className="rounded bg-gray-100 px-1">empresario123</code></p>
+          <p className="text-gray-500">superadmin · admin · inversionista · empresario</p>
+        </div>
+
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Monarch v1.0
         </p>
       </div>
     </div>

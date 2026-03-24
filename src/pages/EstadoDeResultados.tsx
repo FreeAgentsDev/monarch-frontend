@@ -51,6 +51,17 @@ interface EstadoResultadosData {
   countries: CountryData[]
 }
 
+interface CatalogDownloadStats {
+  conPrecios: number
+  sinPrecios: number
+  sinInversion: number
+  total: number
+}
+
+interface StatsData {
+  catalogDownloads?: CatalogDownloadStats
+}
+
 function formatValue(val: number | undefined, isPercent = false): string {
   if (val === undefined || val === null) return '-'
   if (isPercent) return `${(val * 100).toFixed(1)}%`
@@ -132,6 +143,7 @@ export default function EstadoDeResultados() {
   const [viewMode, setViewMode] = useState<'por-pais' | 'consolidado'>('por-pais')
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(() => getExchangeRates())
   const [showFormulas, setShowFormulas] = useState(false)
+  const [stats, setStats] = useState<StatsData | null>(null)
 
   useEffect(() => {
     accountingApi.getEstadoResultados().then((res) => {
@@ -146,6 +158,11 @@ export default function EstadoDeResultados() {
       if (toUse?.countries?.length) setCountryId(toUse.countries[0].id)
     }).catch(console.error).finally(() => setLoading(false))
   }, [paises])
+
+  useEffect(() => {
+    const s = demoStorage.get<StatsData>(STORAGE_KEYS.STATS)
+    setStats(s ?? null)
+  }, [])
 
   const handleCellChange = useCallback((countryId: string, conceptIdx: number, mes: typeof MESES[number], value: number | '') => {
     setEditableData((prev) => {
@@ -176,17 +193,17 @@ export default function EstadoDeResultados() {
     }
   }, [data])
 
-  if (loading || !data || !editableData) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Cargando estado de resultados...</div>
-      </div>
-    )
-  }
-
-  const country = editableData.countries.find((c) => c.id === countryId) || editableData.countries[0]
+  // Importante: los hooks (useMemo) deben ejecutarse siempre.
+  // Usamos valores seguros mientras se cargan los datos.
+  const country = editableData?.countries?.find((c) => c.id === countryId) || editableData?.countries?.[0]
   const concepts = country?.concepts || []
   const hasChanges = editedCells.size > 0
+  const catalogDownloads: CatalogDownloadStats = stats?.catalogDownloads ?? {
+    conPrecios: 0,
+    sinPrecios: 0,
+    sinInversion: 0,
+    total: 0,
+  }
 
   const sections = useMemo(() => {
     const map = new Map<string, ConceptRow[]>()
@@ -240,6 +257,14 @@ export default function EstadoDeResultados() {
 
   const toggleSection = (id: string) => {
     setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  if (loading || !data || !editableData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Cargando estado de resultados...</div>
+      </div>
+    )
   }
 
   return (
@@ -320,6 +345,45 @@ export default function EstadoDeResultados() {
             <BarChart3 size={18} />
             Análisis de datos
           </Link>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="card bg-slate-50 border-slate-200">
+          <p className="text-xs font-semibold text-slate-500 uppercase mb-1">
+            Resultados comerciales · Catálogos
+          </p>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-sm text-slate-600">Descargas totales de catálogos</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
+                {catalogDownloads.total}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+            <div className="rounded-lg bg-white border border-slate-200 px-3 py-2">
+              <p className="text-slate-500">Catálogo con precios</p>
+              <p className="mt-0.5 font-semibold text-slate-900 tabular-nums">
+                {catalogDownloads.conPrecios}
+              </p>
+            </div>
+            <div className="rounded-lg bg-white border border-slate-200 px-3 py-2">
+              <p className="text-slate-500">Catálogo sin precios</p>
+              <p className="mt-0.5 font-semibold text-slate-900 tabular-nums">
+                {catalogDownloads.sinPrecios}
+              </p>
+            </div>
+            <div className="rounded-lg bg-white border border-slate-200 px-3 py-2 col-span-2">
+              <p className="text-slate-500">Catálogo sin inversión (comisiones)</p>
+              <p className="mt-0.5 font-semibold text-slate-900 tabular-nums">
+                {catalogDownloads.sinInversion}
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 text-[11px] text-slate-500">
+            Los valores se actualizan automáticamente cada vez que un inversionista descarga el catálogo desde la vista por país.
+          </p>
         </div>
       </div>
 
