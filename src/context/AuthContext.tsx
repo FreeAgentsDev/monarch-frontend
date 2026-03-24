@@ -10,27 +10,29 @@ export interface User {
   paisCodigo?: string
 }
 
+/** Credenciales por rol: cada rol tiene su propio usuario y contraseña */
+const CREDENTIALS_BY_ROLE: Record<Role, { username: string; password: string }> = {
+  superadmin: { username: 'superadmin', password: 'superadmin123' },
+  administrador: { username: 'admin', password: 'admin123' },
+  inversionista: { username: 'inversionista', password: 'inversionista123' },
+  empresario: { username: 'empresario', password: 'empresario123' },
+}
+
 interface AuthContextValue {
   user: User | null
   role: Role
   setUser: (u: User | null) => void
-  setRole: (r: Role) => void
   logout: () => void
-  login: (username: string, password: string) => { ok: boolean; error?: string }
-  loginAsRole: (role: Role, username: string, password: string) => { ok: boolean; error?: string }
-}
-
-const defaultUser: User = {
-  id: '1',
-  name: 'Admin',
-  email: 'admin@monarch.com',
-  role: 'administrador',
+  /** Login con rol explícito (p. ej. editor de tienda). */
+  login: (selectedRole: Role, username: string, password: string) => { ok: boolean; error?: string }
+  /** Login solo con usuario y contraseña; el rol se deduce de las credenciales. */
+  loginWithCredentials: (username: string, password: string) => { ok: boolean; error?: string; role?: Role }
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState] = useState<User | null>(defaultUser)
+  const [user, setUserState] = useState<User | null>(null)
   const [role, setRoleState] = useState<Role>('administrador')
 
   const setUser = useCallback((u: User | null) => {
@@ -38,44 +40,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (u) setRoleState(u.role)
   }, [])
 
-  const setRole = useCallback((r: Role) => {
-    setRoleState(r)
-    setUserState((prev) => (prev ? { ...prev, role: r } : null))
-  }, [])
-
   const logout = useCallback(() => {
-    setUserState(defaultUser)
+    setUserState(null)
     setRoleState('administrador')
   }, [])
 
-  const login = useCallback((username: string, password: string): { ok: boolean; error?: string } => {
-    const creds: Record<string, string> = {
-      superadmin: 'superadmin123',
-      admin: 'admin123',
-      inversionista: 'inversionista123',
-      empresario: 'empresario123',
-    }
-    const pwd = creds[username.toLowerCase()]
-    if (!pwd || pwd !== password) return { ok: false, error: 'Usuario o contraseña incorrectos' }
-    const roleMap: Record<string, Role> = {
-      superadmin: 'superadmin',
-      admin: 'administrador',
-      inversionista: 'inversionista',
-      empresario: 'empresario',
-    }
-    const r = roleMap[username.toLowerCase()] ?? 'administrador'
-    setUserState({ id: '1', name: username, email: `${username}@monarch.com`, role: r })
-    setRoleState(r)
+  const login = useCallback((selectedRole: Role, username: string, password: string): { ok: boolean; error?: string } => {
+    const cred = CREDENTIALS_BY_ROLE[selectedRole]
+    const userOk = username.trim().toLowerCase() === cred.username.toLowerCase()
+    const passOk = password === cred.password
+    if (!userOk || !passOk) return { ok: false, error: 'Usuario o contraseña incorrectos para este rol.' }
+    const name = cred.username.charAt(0).toUpperCase() + cred.username.slice(1)
+    setUserState({ id: '1', name, email: `${cred.username}@monarch.com`, role: selectedRole })
+    setRoleState(selectedRole)
     return { ok: true }
   }, [])
 
-  const loginAsRole = useCallback((r: Role, username: string, password: string): { ok: boolean; error?: string } => {
-    const res = login(username, password)
-    if (!res.ok) return res
-    setRoleState(r)
-    setUserState((prev) => (prev ? { ...prev, role: r } : null))
-    return { ok: true }
-  }, [login])
+  const loginWithCredentials = useCallback((username: string, password: string): { ok: boolean; error?: string; role?: Role } => {
+    const u = username.trim().toLowerCase()
+    for (const [r, cred] of Object.entries(CREDENTIALS_BY_ROLE)) {
+      const roleKey = r as Role
+      if (u === cred.username.toLowerCase() && password === cred.password) {
+        const name = cred.username.charAt(0).toUpperCase() + cred.username.slice(1)
+        setUserState({ id: '1', name, email: `${cred.username}@monarch.com`, role: roleKey })
+        setRoleState(roleKey)
+        return { ok: true, role: roleKey }
+      }
+    }
+    return { ok: false, error: 'Usuario o contraseña incorrectos.' }
+  }, [])
 
   return (
     <AuthContext.Provider
@@ -83,10 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         role,
         setUser,
-        setRole,
         logout,
         login,
-        loginAsRole,
+        loginWithCredentials,
       }}
     >
       {children}
@@ -101,11 +93,11 @@ export function useAuth() {
 }
 
 export function canAccess(role: Role, path: string): boolean {
-  const inversionistaPaths = ['/inversionistas', '/inversionistas/vista', '/paises', '/avance-semana']
-  const empresarioPaths = ['/empresarios', '/empresarios/pedidos', '/avance-semana']
+  const inversionistaPaths = ['/inversionistas/panel', '/inversionistas/vista', '/rutas-entregas', '/gestion-inversionistas', '/estado-resultados']
+  const empresarioPaths = ['/empresarios/panel', '/empresarios/tienda', '/empresarios/tienda/editor', '/empresarios/pedidos', '/empresarios/vista', '/rutas-entregas', '/gestion-empresarios', '/estado-resultados', '/avance-semana']
 
   if (role === 'superadmin' || role === 'administrador') return true
-  if (role === 'inversionista') return inversionistaPaths.some((p) => path.startsWith(p)) || path === '/avance-semana'
-  if (role === 'empresario') return empresarioPaths.some((p) => path.startsWith(p)) || path === '/avance-semana'
+  if (role === 'inversionista') return inversionistaPaths.some((p) => path.startsWith(p))
+  if (role === 'empresario') return empresarioPaths.some((p) => path.startsWith(p))
   return false
 }

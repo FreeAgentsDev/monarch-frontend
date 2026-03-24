@@ -5,8 +5,8 @@ import { useAuth, type Role } from '../context/AuthContext'
 const HOME_BY_ROLE: Record<Role, string> = {
   superadmin: '/dashboard',
   administrador: '/dashboard',
-  inversionista: '/avance-semana',
-  empresario: '/avance-semana',
+  inversionista: '/inversionistas/panel',
+  empresario: '/empresarios/panel',
 }
 
 /**

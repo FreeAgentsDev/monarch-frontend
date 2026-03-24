@@ -5,8 +5,8 @@ import { useAuth, canAccess, type Role } from '../context/AuthContext'
 const DEFAULT_BY_ROLE: Record<Role, string> = {
   superadmin: '/dashboard',
   administrador: '/dashboard',
-  inversionista: '/avance-semana',
-  empresario: '/avance-semana',
+  inversionista: '/inversionistas/panel',
+  empresario: '/empresarios/panel',
 }
 
 interface ProtectedRouteProps {
