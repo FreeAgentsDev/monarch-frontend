@@ -39,13 +39,13 @@ export default function EmpresariosPedidos() {
       </div>
 
       <div className="flex justify-end">
-        <button
-          type="button"
+        <Link
+          to="/empresarios/panel?tab=crear"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700"
         >
           <Plus size={18} />
           Nuevo pedido
-        </button>
+        </Link>
       </div>
 
       {loading ? (

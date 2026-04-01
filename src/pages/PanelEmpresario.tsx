@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Package,
   Plus,
@@ -58,9 +58,17 @@ const TRANSPORTADORAS = [
   { nombre: 'Coordinadora', pais: 'Colombia', servicio: 'Estándar', url: '#' },
 ]
 
+const VALID_TABS: TabId[] = ['historial', 'crear', 'contabilidad', 'transportadoras']
+
+function tabFromSearchParams(searchParams: URLSearchParams): TabId | null {
+  const t = searchParams.get('tab')
+  return t && VALID_TABS.includes(t as TabId) ? (t as TabId) : null
+}
+
 export default function PanelEmpresario() {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState<TabId>('historial')
+  const [searchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState<TabId>(() => tabFromSearchParams(searchParams) ?? 'historial')
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [estadoOverrides, setEstadoOverrides] = useState<Record<string, PedidoEstado>>({})
@@ -80,6 +88,11 @@ export default function PanelEmpresario() {
     observaciones: '',
     moneda: 'USD',
   })
+
+  useEffect(() => {
+    const next = tabFromSearchParams(searchParams)
+    if (next) setActiveTab(next)
+  }, [searchParams])
 
   useEffect(() => {
     ordersApi
