@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, Trash2, Shield, UserCheck } from 'lucide-react'
 import { demoStorage, STORAGE_KEYS, DEFAULT_USUARIOS, UsuarioSistema, RolUsuario } from '../utils/storage'
+import { isValidEmail, inputErrorClass } from '../utils/formValidation'
 
 const ROL_LABELS: Record<RolUsuario, string> = {
   superadmin: 'Superadmin',
@@ -26,26 +27,38 @@ export default function PanelGestionUsuarios() {
     rol: 'administrador',
     activo: true,
   })
+  const [formErrors, setFormErrors] = useState<{ nombre?: string; email?: string; rol?: string }>({})
 
   useEffect(() => {
     demoStorage.set(STORAGE_KEYS.USUARIOS, usuarios)
   }, [usuarios])
 
   const handleSave = useCallback(() => {
-    if (!form.nombre || !form.email || !form.rol) return
+    const err: { nombre?: string; email?: string; rol?: string } = {}
+    if (!form.nombre?.trim()) err.nombre = 'El nombre es obligatorio.'
+    if (!form.email?.trim()) err.email = 'El email es obligatorio.'
+    else if (!isValidEmail(form.email)) err.email = 'Introduce un email válido.'
+    if (!form.rol) err.rol = 'El rol es obligatorio.'
+    setFormErrors(err)
+    if (Object.keys(err).length) return
+
     const now = new Date().toISOString()
+    const nombre = form.nombre!.trim()
+    const email = form.email!.trim()
+    const rol = form.rol!
     if (isAdding) {
       const nuevo: UsuarioSistema = {
         id: uid(),
-        nombre: form.nombre,
-        email: form.email,
-        rol: form.rol,
+        nombre,
+        email,
+        rol,
         activo: form.activo ?? true,
         createdAt: now,
         updatedAt: now,
       }
       setUsuarios((prev) => [...prev, nuevo])
       setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+      setFormErrors({})
       setIsAdding(false)
     } else if (editingId) {
       setUsuarios((prev) =>
@@ -57,10 +70,12 @@ export default function PanelGestionUsuarios() {
       )
       setEditingId(null)
       setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+      setFormErrors({})
     }
   }, [form, isAdding, editingId])
 
   const handleEdit = useCallback((u: UsuarioSistema) => {
+    setFormErrors({})
     setForm({
       nombre: u.nombre,
       email: u.email,
@@ -84,6 +99,7 @@ export default function PanelGestionUsuarios() {
   const handleCancel = useCallback(() => {
     setEditingId(null)
     setIsAdding(false)
+    setFormErrors({})
     setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
   }, [])
 
@@ -105,6 +121,7 @@ export default function PanelGestionUsuarios() {
             setIsAdding(true)
             setEditingId(null)
             setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+            setFormErrors({})
           }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
         >
@@ -117,31 +134,52 @@ export default function PanelGestionUsuarios() {
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <h3 className="text-sm font-medium text-gray-700 mb-3">{isAdding ? 'Nuevo usuario' : 'Editar usuario'}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={form.nombre}
-              onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
-              className="input"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              className="input"
-            />
-            <select
-              value={form.rol}
-              onChange={(e) => setForm((f) => ({ ...f, rol: e.target.value as RolUsuario }))}
-              className="input"
-            >
+            <div className="sm:col-span-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={form.nombre}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, nombre: e.target.value }))
+                  setFormErrors((er) => ({ ...er, nombre: undefined }))
+                }}
+                className={`input ${inputErrorClass(!!formErrors.nombre)}`}
+              />
+              {formErrors.nombre && <p className="text-xs text-red-600 mt-1">{formErrors.nombre}</p>}
+            </div>
+            <div className="sm:col-span-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+              <input
+                type="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                  setFormErrors((er) => ({ ...er, email: undefined }))
+                }}
+                className={`input ${inputErrorClass(!!formErrors.email)}`}
+              />
+              {formErrors.email && <p className="text-xs text-red-600 mt-1">{formErrors.email}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Rol</label>
+              <select
+                value={form.rol}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, rol: e.target.value as RolUsuario }))
+                  setFormErrors((er) => ({ ...er, rol: undefined }))
+                }}
+                className={`input ${inputErrorClass(!!formErrors.rol)}`}
+              >
               {(Object.keys(ROL_LABELS) as RolUsuario[]).map((r) => (
                 <option key={r} value={r}>
                   {ROL_LABELS[r]}
                 </option>
               ))}
-            </select>
+              </select>
+              {formErrors.rol && <p className="text-xs text-red-600 mt-1">{formErrors.rol}</p>}
+            </div>
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, Coins } from 'lucide-react'
 import { demoStorage, STORAGE_KEYS, DEFAULT_EXCHANGE_RATES } from '../../utils/storage'
+import { parseAccountingNumberInput, inputErrorClass } from '../../utils/formValidation'
 
 const CURRENCY_LABELS: Record<string, string> = {
   COP: 'Peso colombiano (base)',
@@ -28,6 +29,7 @@ export function getExchangeRates(): ExchangeRates {
 export default function ExchangeRatesConfig({ onRatesChange, compact = false }: ExchangeRatesConfigProps) {
   const [open, setOpen] = useState(false)
   const [rates, setRates] = useState<ExchangeRates>(() => getExchangeRates())
+  const [rateErrors, setRateErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const stored = demoStorage.get<ExchangeRates>(STORAGE_KEYS.EXCHANGE_RATES)
@@ -35,8 +37,23 @@ export default function ExchangeRatesConfig({ onRatesChange, compact = false }: 
     setRates(merged)
   }, [])
 
-  const handleChange = (currency: string, value: number) => {
-    const next = { ...rates, [currency]: value }
+  const handleChange = (currency: string, raw: string) => {
+    if (currency === 'COP') return
+    const parsed = parseAccountingNumberInput(raw)
+    if (!parsed.ok) {
+      setRateErrors((e) => ({ ...e, [currency]: parsed.reason }))
+      return
+    }
+    if (parsed.value < 0) {
+      setRateErrors((e) => ({ ...e, [currency]: 'La tasa no puede ser negativa.' }))
+      return
+    }
+    setRateErrors((e) => {
+      const n = { ...e }
+      delete n[currency]
+      return n
+    })
+    const next = { ...rates, [currency]: parsed.value }
     setRates(next)
     demoStorage.set(STORAGE_KEYS.EXCHANGE_RATES, next)
     onRatesChange?.(next)
@@ -45,6 +62,7 @@ export default function ExchangeRatesConfig({ onRatesChange, compact = false }: 
   const handleReset = () => {
     demoStorage.remove(STORAGE_KEYS.EXCHANGE_RATES)
     setRates({ ...DEFAULT_EXCHANGE_RATES })
+    setRateErrors({})
     onRatesChange?.({ ...DEFAULT_EXCHANGE_RATES })
   }
 
@@ -73,14 +91,17 @@ export default function ExchangeRatesConfig({ onRatesChange, compact = false }: 
                   {currency} {currency !== 'COP' && <span className="text-gray-400">→ COP</span>}
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={rates[currency] ?? defaultVal}
-                  onChange={(e) => handleChange(currency, parseFloat(e.target.value) || 0)}
-                  min={currency === 'COP' ? 1 : 0}
-                  step={currency === 'COP' ? 1 : 0.01}
+                  onChange={(e) => handleChange(currency, e.target.value)}
                   disabled={currency === 'COP'}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  title={rateErrors[currency]}
+                  className={`w-full rounded border px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed border-gray-300 ${inputErrorClass(!!rateErrors[currency])}`}
                 />
+                {currency !== 'COP' && rateErrors[currency] && (
+                  <p className="text-xs text-red-600 mt-0.5">{rateErrors[currency]}</p>
+                )}
                 {currency !== 'COP' && (
                   <p className="text-xs text-gray-400 mt-0.5">{CURRENCY_LABELS[currency] || currency}</p>
                 )}

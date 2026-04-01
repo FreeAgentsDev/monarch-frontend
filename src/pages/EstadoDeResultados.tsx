@@ -6,6 +6,7 @@ import { usePaises } from '../hooks/usePaisesInversionistas'
 import { getExchangeRates } from '../components/contabilidad/ExchangeRatesConfig'
 import ExchangeRatesConfig from '../components/contabilidad/ExchangeRatesConfig'
 import { BarChart3, RotateCcw, Calculator, Pencil, Globe, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { parseAccountingNumberInput, parsePercentInput, inputErrorClass } from '../utils/formValidation'
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] as const
 const MESES_LABEL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -140,6 +141,7 @@ export default function EstadoDeResultados() {
   const [loading, setLoading] = useState(true)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [editedCells, setEditedCells] = useState<Set<string>>(new Set())
+  const [cellErrors, setCellErrors] = useState<Record<string, string>>({})
   const [viewMode, setViewMode] = useState<'por-pais' | 'consolidado'>('por-pais')
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(() => getExchangeRates())
   const [showFormulas, setShowFormulas] = useState(false)
@@ -190,6 +192,7 @@ export default function EstadoDeResultados() {
       demoStorage.remove(STORAGE_KEYS.ESTADO_RESULTADOS)
       setEditableData(deepCloneData(data))
       setEditedCells(new Set())
+      setCellErrors({})
     }
   }, [data])
 
@@ -511,18 +514,38 @@ export default function EstadoDeResultados() {
                                 >
                                   <input
                                     type="text"
+                                    inputMode={isMargin ? 'decimal' : 'decimal'}
+                                    title={cellErrors[cellKey]}
                                     value={rawVal === undefined || rawVal === null ? '' : (isMargin ? String((rawVal * 100).toFixed(1)) : String(rawVal))}
                                     onChange={(e) => {
                                       const v = e.target.value
                                       if (isMargin) {
-                                        const pct = v === '' ? 0 : parseFloat(v) / 100
-                                        handleCellChange(countryId, globalIdx, mes, isNaN(pct) ? 0 : pct)
+                                        const pct = parsePercentInput(v)
+                                        if (!pct.ok) {
+                                          setCellErrors((prev) => ({ ...prev, [cellKey]: pct.reason }))
+                                          return
+                                        }
+                                        setCellErrors((prev) => {
+                                          const n = { ...prev }
+                                          delete n[cellKey]
+                                          return n
+                                        })
+                                        handleCellChange(countryId, globalIdx, mes, pct.value)
                                       } else {
-                                        const num = v === '' ? '' : parseFloat(v.replace(/,/g, ''))
-                                        handleCellChange(countryId, globalIdx, mes, num === '' ? 0 : (isNaN(Number(num)) ? 0 : Number(num)))
+                                        const num = parseAccountingNumberInput(v.replace(/,/g, ''))
+                                        if (!num.ok) {
+                                          setCellErrors((prev) => ({ ...prev, [cellKey]: num.reason }))
+                                          return
+                                        }
+                                        setCellErrors((prev) => {
+                                          const n = { ...prev }
+                                          delete n[cellKey]
+                                          return n
+                                        })
+                                        handleCellChange(countryId, globalIdx, mes, num.value)
                                       }
                                     }}
-                                    className="w-full min-w-[4rem] text-right py-1 px-2 rounded border border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-transparent text-sm"
+                                    className={`w-full min-w-[4rem] text-right py-1 px-2 rounded border border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-transparent text-sm ${inputErrorClass(!!cellErrors[cellKey])}`}
                                   />
                                 </td>
                               )

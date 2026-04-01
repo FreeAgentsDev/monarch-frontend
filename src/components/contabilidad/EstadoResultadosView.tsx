@@ -3,6 +3,7 @@ import { RotateCcw, Pencil, Calculator, Globe } from 'lucide-react'
 import { demoStorage, STORAGE_KEYS } from '../../utils/storage'
 import { getExchangeRates } from './ExchangeRatesConfig'
 import ExchangeRatesConfig from './ExchangeRatesConfig'
+import { parseAccountingNumberInput, parsePercentInput, inputErrorClass } from '../../utils/formValidation'
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] as const
 const MESES_LABEL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -81,6 +82,7 @@ export default function EstadoResultadosView({ data }: EstadoResultadosViewProps
   const [countryId, setCountryId] = useState<string>(data.countries[0]?.id ?? '')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [editedCells, setEditedCells] = useState<Set<string>>(new Set())
+  const [cellErrors, setCellErrors] = useState<Record<string, string>>({})
   const [viewMode, setViewMode] = useState<'por-pais' | 'consolidado'>('por-pais')
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(() => getExchangeRates())
 
@@ -92,6 +94,7 @@ export default function EstadoResultadosView({ data }: EstadoResultadosViewProps
       setEditableData(deepCloneEstado(data))
     }
     setEditedCells(new Set())
+    setCellErrors({})
   }, [data])
 
   useEffect(() => {
@@ -118,6 +121,7 @@ export default function EstadoResultadosView({ data }: EstadoResultadosViewProps
     demoStorage.remove(STORAGE_KEYS.ESTADO_RESULTADOS)
     setEditableData(deepCloneEstado(data))
     setEditedCells(new Set())
+    setCellErrors({})
   }, [data])
 
   const country = editableData.countries.find((c: CountryData) => c.id === countryId) ?? editableData.countries[0]
@@ -320,18 +324,38 @@ export default function EstadoResultadosView({ data }: EstadoResultadosViewProps
                                 >
                                   <input
                                     type="text"
+                                    inputMode="decimal"
+                                    title={cellErrors[cellKey]}
                                     value={rawVal === undefined || rawVal === null ? '' : (isMargin ? String((rawVal * 100).toFixed(1)) : String(rawVal))}
                                     onChange={(e) => {
                                       const v = e.target.value
                                       if (isMargin) {
-                                        const pct = v === '' ? 0 : parseFloat(v) / 100
-                                        handleCellChange(countryId, globalIdx, mes, isNaN(pct) ? 0 : pct)
+                                        const pct = parsePercentInput(v)
+                                        if (!pct.ok) {
+                                          setCellErrors((prev) => ({ ...prev, [cellKey]: pct.reason }))
+                                          return
+                                        }
+                                        setCellErrors((prev) => {
+                                          const n = { ...prev }
+                                          delete n[cellKey]
+                                          return n
+                                        })
+                                        handleCellChange(countryId, globalIdx, mes, pct.value)
                                       } else {
-                                        const num = v === '' ? '' : parseFloat(v.replace(/,/g, ''))
-                                        handleCellChange(countryId, globalIdx, mes, num === '' ? 0 : (isNaN(Number(num)) ? 0 : Number(num)))
+                                        const num = parseAccountingNumberInput(v.replace(/,/g, ''))
+                                        if (!num.ok) {
+                                          setCellErrors((prev) => ({ ...prev, [cellKey]: num.reason }))
+                                          return
+                                        }
+                                        setCellErrors((prev) => {
+                                          const n = { ...prev }
+                                          delete n[cellKey]
+                                          return n
+                                        })
+                                        handleCellChange(countryId, globalIdx, mes, num.value)
                                       }
                                     }}
-                                    className="w-full min-w-[4rem] text-right py-1 px-2 rounded border border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-transparent text-sm"
+                                    className={`w-full min-w-[4rem] text-right py-1 px-2 rounded border border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-transparent text-sm ${inputErrorClass(!!cellErrors[cellKey])}`}
                                   />
                                 </td>
                               )
