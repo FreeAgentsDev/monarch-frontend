@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Plus, ArrowLeft, Pencil, Trash2, Save, X } from 'lucide-react'
 import { useEmpresarios } from '../hooks/useEmpresarios'
 import type { Empresario } from '../utils/storage'
+import { isValidEmail, inputErrorClass } from '../utils/formValidation'
 
 export default function GestionEmpresarios() {
   const { empresarios, add, update, remove } = useEmpresarios()
@@ -18,16 +19,19 @@ export default function GestionEmpresarios() {
     activo: true,
     notas: '',
   })
+  const [fieldErrors, setFieldErrors] = useState<{ nombre?: string; email?: string }>({})
 
   const startAdd = () => {
     setIsAdding(true)
     setEditingId(null)
+    setFieldErrors({})
     setDraft({ nombre: '', email: '', telefono: '', activo: true, notas: '' })
   }
 
   const startEdit = (e: Empresario) => {
     setIsAdding(false)
     setEditingId(e.id)
+    setFieldErrors({})
     setDraft({
       nombre: e.nombre,
       email: e.email,
@@ -40,18 +44,27 @@ export default function GestionEmpresarios() {
   const cancel = () => {
     setIsAdding(false)
     setEditingId(null)
+    setFieldErrors({})
   }
 
   const save = () => {
-    if (!draft.nombre.trim() || !draft.email.trim()) return
+    const err: { nombre?: string; email?: string } = {}
+    if (!draft.nombre.trim()) err.nombre = 'El nombre es obligatorio.'
+    if (!draft.email.trim()) err.email = 'El email es obligatorio.'
+    else if (!isValidEmail(draft.email)) err.email = 'Introduce un email válido (ej. nombre@dominio.com).'
+    setFieldErrors(err)
+    if (Object.keys(err).length) return
+
     if (isAdding) {
       add({ ...draft, telefono: draft.telefono?.trim() || undefined, notas: draft.notas?.trim() || undefined })
       setIsAdding(false)
+      setFieldErrors({})
       return
     }
     if (editingId) {
       update(editingId, { ...draft, telefono: draft.telefono?.trim() || undefined, notas: draft.notas?.trim() || undefined })
       setEditingId(null)
+      setFieldErrors({})
     }
   }
 
@@ -168,17 +181,27 @@ export default function GestionEmpresarios() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                 <input
                   value={draft.nombre}
-                  onChange={(e) => setDraft((p) => ({ ...p, nombre: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  onChange={(e) => {
+                    setDraft((p) => ({ ...p, nombre: e.target.value }))
+                    setFieldErrors((er) => ({ ...er, nombre: undefined }))
+                  }}
+                  className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${fieldErrors.nombre ? inputErrorClass(true) : 'border-gray-300'}`}
                 />
+                {fieldErrors.nombre && <p className="text-xs text-red-600 mt-1">{fieldErrors.nombre}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
+                  type="email"
+                  autoComplete="email"
                   value={draft.email}
-                  onChange={(e) => setDraft((p) => ({ ...p, email: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  onChange={(e) => {
+                    setDraft((p) => ({ ...p, email: e.target.value }))
+                    setFieldErrors((er) => ({ ...er, email: undefined }))
+                  }}
+                  className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${fieldErrors.email ? inputErrorClass(true) : 'border-gray-300'}`}
                 />
+                {fieldErrors.email && <p className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
@@ -210,7 +233,6 @@ export default function GestionEmpresarios() {
                 type="button"
                 onClick={save}
                 className="inline-flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
-                disabled={!draft.nombre.trim() || !draft.email.trim()}
               >
                 <Save size={16} />
                 Guardar
