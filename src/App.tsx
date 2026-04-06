@@ -7,28 +7,21 @@ import RoleAwareRedirect from './components/RoleAwareRedirect'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Orders from './pages/Orders'
-import Accounting from './pages/Accounting'
-import ContabilidadHub from './pages/ContabilidadHub'
+import Contabilidad from './pages/Contabilidad'
 import EstadoDeResultados from './pages/EstadoDeResultados'
 import AnalisisDatos from './pages/AnalisisDatos'
 import Shopify from './pages/Shopify'
 import OrderDetail from './pages/OrderDetail'
 import Paises from './pages/Paises'
 import Inversionistas from './pages/Inversionistas'
-import VistaInversionista from './pages/VistaInversionista'
-import PanelInversionista from './pages/PanelInversionista'
-import GestionPaises from './pages/GestionPaises'
-import GestionInversionistas from './pages/GestionInversionistas'
-import GestionUsuarios from './pages/GestionUsuarios'
-import GestionEmpresarios from './pages/GestionEmpresarios'
+import Catalogo from './pages/Catalogo'
+import Empresarios from './pages/Empresarios'
 import RutasEntregas from './pages/RutasEntregas'
 import Configuracion from './pages/Configuracion'
-import EmpresariosPedidos from './pages/EmpresariosPedidos'
-import PanelEmpresario from './pages/PanelEmpresario'
-import VistaEmpresario from './pages/VistaEmpresario'
+import MiPanel from './pages/MiPanel'
+import VistaPais from './pages/VistaPais'
 import TiendaEmpresario from './pages/TiendaEmpresario'
 import TiendaEditor from './pages/TiendaEditor'
-import AvanceSemana from './pages/AvanceSemana'
 
 function App() {
   return (
@@ -37,9 +30,9 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
 
-          {/* Tienda pública del empresario: layout propio, sin sidebar */}
+          {/* Tienda publica del empresario: layout propio, sin sidebar */}
           <Route
-            path="/empresarios/tienda"
+            path="/mi-tienda"
             element={
               <RequireAuth>
                 <ProtectedRoute>
@@ -48,8 +41,7 @@ function App() {
               </RequireAuth>
             }
           />
-          {/* Editor con login interno */}
-          <Route path="/empresarios/tienda/editor" element={<TiendaEditor />} />
+          <Route path="/mi-tienda/editor" element={<TiendaEditor />} />
 
           <Route
             path="*"
@@ -61,27 +53,20 @@ function App() {
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
                     <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
-                    <Route path="/accounting" element={<ProtectedRoute><Accounting /></ProtectedRoute>} />
-                    <Route path="/contabilidad" element={<ProtectedRoute><ContabilidadHub /></ProtectedRoute>} />
+                    <Route path="/contabilidad" element={<ProtectedRoute><Contabilidad /></ProtectedRoute>} />
                     <Route path="/estado-resultados" element={<ProtectedRoute><EstadoDeResultados /></ProtectedRoute>} />
                     <Route path="/analisis" element={<ProtectedRoute><AnalisisDatos /></ProtectedRoute>} />
                     <Route path="/shopify" element={<ProtectedRoute><Shopify /></ProtectedRoute>} />
                     <Route path="/paises" element={<ProtectedRoute><Paises /></ProtectedRoute>} />
-                    <Route path="/gestion-paises" element={<ProtectedRoute><GestionPaises /></ProtectedRoute>} />
                     <Route path="/inversionistas" element={<ProtectedRoute><Inversionistas /></ProtectedRoute>} />
-                    <Route path="/inversionistas/vista/:paisCodigo" element={<ProtectedRoute><VistaInversionista /></ProtectedRoute>} />
-                    <Route path="/inversionistas/vista" element={<Navigate to="/inversionistas/vista/EC" replace />} />
-                    <Route path="/inversionistas/panel" element={<ProtectedRoute><PanelInversionista /></ProtectedRoute>} />
-                    <Route path="/gestion-inversionistas" element={<ProtectedRoute><GestionInversionistas /></ProtectedRoute>} />
-                    <Route path="/gestion-usuarios" element={<ProtectedRoute><GestionUsuarios /></ProtectedRoute>} />
-                    <Route path="/gestion-empresarios" element={<ProtectedRoute><GestionEmpresarios /></ProtectedRoute>} />
-                    <Route path="/empresarios/pedidos" element={<ProtectedRoute><EmpresariosPedidos /></ProtectedRoute>} />
-                    <Route path="/empresarios/panel" element={<ProtectedRoute><PanelEmpresario /></ProtectedRoute>} />
-                    <Route path="/empresarios/vista/:paisCodigo" element={<ProtectedRoute><VistaEmpresario /></ProtectedRoute>} />
-                    <Route path="/empresarios/vista" element={<Navigate to="/empresarios/vista/EC" replace />} />
-                    <Route path="/avance-semana" element={<ProtectedRoute><AvanceSemana /></ProtectedRoute>} />
+                    <Route path="/empresarios" element={<ProtectedRoute><Empresarios /></ProtectedRoute>} />
+                    <Route path="/gestion-catalogo" element={<ProtectedRoute><Catalogo /></ProtectedRoute>} />
                     <Route path="/rutas-entregas" element={<ProtectedRoute><RutasEntregas /></ProtectedRoute>} />
                     <Route path="/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
+                    {/* Socio (empresario/inversionista) routes */}
+                    <Route path="/mi-panel" element={<ProtectedRoute><MiPanel /></ProtectedRoute>} />
+                    <Route path="/catalogo/:paisCodigo" element={<ProtectedRoute><VistaPais /></ProtectedRoute>} />
+                    <Route path="/catalogo" element={<Navigate to="/catalogo/EC" replace />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Layout>

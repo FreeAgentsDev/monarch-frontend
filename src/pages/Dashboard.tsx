@@ -5,141 +5,74 @@ import {
   Calculator,
   BarChart3,
   FileSpreadsheet,
-  Activity,
   RotateCcw,
   AlertCircle,
-  Shield
+  Users,
+  ArrowRight,
+  Settings,
+  Store,
+  Pencil,
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
 import { dashboardApi, ordersApi, accountingApi, DashboardStats, Order, Transaction as TransactionType } from '../services/api'
 import { demoStorage, STORAGE_KEYS } from '../utils/storage'
 import { format } from 'date-fns'
 
 const COUNTRY_COLS = ['colombia', 'ecuador', 'espana', 'chile', 'repDominicana', 'costaRica'] as const
+const COUNTRY_LABELS: Record<string, string> = { colombia: 'CO', ecuador: 'EC', espana: 'ES', chile: 'CL', repDominicana: 'RD', costaRica: 'CR' }
 
-interface CuadroRow {
-  mes: string
-  colombia: number
-  ecuador: number
-  espana: number
-  chile: number
-  repDominicana: number
-  costaRica: number
-  totalPesos?: number
-}
+interface CuadroRow { mes: string; colombia: number; ecuador: number; espana: number; chile: number; repDominicana: number; costaRica: number; totalPesos?: number }
+interface CuadroBlock { columns: string[]; rows: CuadroRow[] }
+interface CuadroGeneral { title: string; columns?: string[]; rows?: CuadroRow[]; pesos?: CuadroBlock; local?: CuadroBlock }
 
-interface CuadroBlock {
-  columns: string[]
-  rows: CuadroRow[]
-}
-
-interface CuadroGeneral {
-  title: string
-  columns?: string[]
-  rows?: CuadroRow[]
-  pesos?: CuadroBlock
-  local?: CuadroBlock
-}
-
-function formatNum(n: number) {
-  return n.toLocaleString('es-ES', { maximumFractionDigits: 0 })
-}
+function formatNum(n: number) { return n.toLocaleString('es-ES', { maximumFractionDigits: 0 }) }
 
 export default function Dashboard() {
-  const { role } = useAuth()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [cuadro, setCuadro] = useState<CuadroGeneral | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-
-  // Valores editables (KPIs)
   const [ventas, setVentas] = useState(0)
   const [gastos, setGastos] = useState(0)
   const [pedidos, setPedidos] = useState(0)
-
-  // Tabla editable
   const [cuadroRows, setCuadroRows] = useState<CuadroRow[]>([])
 
   const loadAllData = useCallback(async () => {
-    setLoadError(null)
-    setLoading(true)
+    setLoadError(null); setLoading(true)
     try {
       const [statsRes, cuadroRes, ordersRes, transactionsRes] = await Promise.all([
-        dashboardApi.getStats(),
-        accountingApi.getCuadroGeneral(),
-        ordersApi.getAll(),
-        accountingApi.getTransactions()
+        dashboardApi.getStats(), accountingApi.getCuadroGeneral(), ordersApi.getAll(), accountingApi.getTransactions()
       ])
-      setStats(statsRes.data)
-      setOrders(ordersRes.data)
-
+      setStats(statsRes.data); setOrders(ordersRes.data)
       const totalRevenue = transactionsRes.data.filter((t: TransactionType) => t.type === 'sale').reduce((s: number, t: TransactionType) => s + t.baseCurrencyAmount, 0)
       const totalExpenses = transactionsRes.data.filter((t: TransactionType) => t.type === 'expense').reduce((s: number, t: TransactionType) => s + t.baseCurrencyAmount, 0)
       const apiCuadro = cuadroRes.data as CuadroGeneral
       const apiRows = apiCuadro.pesos?.rows ?? apiCuadro.rows ?? []
-
-      // Cargar desde localStorage si existe (demo persistente)
       const storedKpis = demoStorage.get<{ ventas: number; gastos: number; pedidos: number }>(STORAGE_KEYS.DASHBOARD_KPIS)
       const storedCuadro = demoStorage.get<CuadroGeneral>(STORAGE_KEYS.CUADRO_GENERAL)
-
-      if (storedCuadro?.pesos?.rows?.length) {
-        setCuadro(storedCuadro)
-        setCuadroRows(JSON.parse(JSON.stringify(storedCuadro.pesos!.rows)))
-      } else {
-        setCuadro(apiCuadro)
-        setCuadroRows(JSON.parse(JSON.stringify(apiRows)))
-      }
-
-      if (storedKpis) {
-        setVentas(storedKpis.ventas ?? totalRevenue)
-        setGastos(storedKpis.gastos ?? totalExpenses)
-        setPedidos(storedKpis.pedidos ?? statsRes.data.totalOrders)
-      } else {
-        setVentas(totalRevenue)
-        setGastos(totalExpenses)
-        setPedidos(statsRes.data.totalOrders)
-      }
+      if (storedCuadro?.pesos?.rows?.length) { setCuadro(storedCuadro); setCuadroRows(JSON.parse(JSON.stringify(storedCuadro.pesos!.rows))) }
+      else { setCuadro(apiCuadro); setCuadroRows(JSON.parse(JSON.stringify(apiRows))) }
+      if (storedKpis) { setVentas(storedKpis.ventas ?? totalRevenue); setGastos(storedKpis.gastos ?? totalExpenses); setPedidos(storedKpis.pedidos ?? statsRes.data.totalOrders) }
+      else { setVentas(totalRevenue); setGastos(totalExpenses); setPedidos(statsRes.data.totalOrders) }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al cargar los datos'
-      setLoadError(msg)
-      console.error('Error loading data:', err)
-    } finally {
-      setLoading(false)
-    }
+      setLoadError(err instanceof Error ? err.message : 'Error al cargar los datos')
+    } finally { setLoading(false) }
   }, [])
 
-  useEffect(() => {
-    loadAllData()
-  }, [loadAllData])
-
-  // Persistir en localStorage cuando el usuario edita
-  useEffect(() => {
-    if (!stats) return
-    demoStorage.set(STORAGE_KEYS.DASHBOARD_KPIS, { ventas, gastos, pedidos })
-  }, [ventas, gastos, pedidos, stats])
-
+  useEffect(() => { loadAllData() }, [loadAllData])
+  useEffect(() => { if (stats) demoStorage.set(STORAGE_KEYS.DASHBOARD_KPIS, { ventas, gastos, pedidos }) }, [ventas, gastos, pedidos, stats])
   useEffect(() => {
     if (!cuadro || cuadroRows.length === 0) return
-    const toSave: CuadroGeneral = {
-      ...cuadro,
-      pesos: cuadro.pesos ? { ...cuadro.pesos, rows: cuadroRows } : { columns: [], rows: cuadroRows },
-    }
-    demoStorage.set(STORAGE_KEYS.CUADRO_GENERAL, toSave)
+    demoStorage.set(STORAGE_KEYS.CUADRO_GENERAL, { ...cuadro, pesos: cuadro.pesos ? { ...cuadro.pesos, rows: cuadroRows } : { columns: [], rows: cuadroRows } })
   }, [cuadro, cuadroRows])
 
   const recalcular = useCallback(() => {
     const monthRows = cuadroRows.filter((r) => r.mes !== 'TOTAL')
     const totalIdx = cuadroRows.findIndex((r) => r.mes === 'TOTAL')
     if (totalIdx < 0) return
-
     const next = JSON.parse(JSON.stringify(cuadroRows))
-    monthRows.forEach((_, i) => {
-      next[i].totalPesos = COUNTRY_COLS.reduce((s, c) => s + (next[i][c] || 0), 0)
-    })
-    COUNTRY_COLS.forEach((col) => {
-      next[totalIdx][col] = monthRows.reduce((s, _, i) => s + (next[i][col] || 0), 0)
-    })
+    monthRows.forEach((_, i) => { next[i].totalPesos = COUNTRY_COLS.reduce((s, c) => s + (next[i][c] || 0), 0) })
+    COUNTRY_COLS.forEach((col) => { next[totalIdx][col] = monthRows.reduce((s, _, i) => s + (next[i][col] || 0), 0) })
     next[totalIdx].totalPesos = COUNTRY_COLS.reduce((s, c) => s + (next[totalIdx][c] || 0), 0)
     setCuadroRows(next)
   }, [cuadroRows])
@@ -155,176 +88,109 @@ export default function Dashboard() {
 
   const utilidadNeta = ventas - gastos
 
-  if (loading && !stats) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Cargando...</div>
-      </div>
-    )
-  }
-
-  if (loadError) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="flex items-center gap-3 text-amber-600">
-          <AlertCircle size={32} />
-          <h2 className="text-lg font-semibold">Error de conexión</h2>
-        </div>
-        <p className="text-gray-600 text-center max-w-md">
-          No se pudieron cargar los datos. Verifica que el servidor esté en ejecución y vuelve a intentar.
-        </p>
-        <button
-          type="button"
-          onClick={loadAllData}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700"
-        >
-          <RotateCcw size={18} />
-          Reintentar
-        </button>
-      </div>
-    )
-  }
-
+  if (loading && !stats) return <div className="flex items-center justify-center h-64"><div className="animate-pulse text-gray-400">Cargando dashboard...</div></div>
+  if (loadError) return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <AlertCircle size={40} className="text-amber-400" />
+      <p className="text-gray-600 text-center max-w-md">No se pudieron cargar los datos.</p>
+      <button type="button" onClick={loadAllData} className="btn-primary"><RotateCcw size={16} /> Reintentar</button>
+    </div>
+  )
   if (!stats || !cuadro || cuadroRows.length === 0) return null
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="page-header">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Modo Excel — edita los valores y pulsa Calcular para actualizar totales</p>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">Vista general de Kevin Jewelry. Los valores son editables.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={recalcular}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
-          >
-            <Calculator size={18} />
-            Calcular
-          </button>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Activity className="w-4 h-4" />
-            <span>Actualizado hace unos momentos</span>
+        <button type="button" onClick={recalcular} className="btn-primary">
+          <Calculator size={16} /> Recalcular totales
+        </button>
+      </div>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="kpi">
+          <p className="kpi-label">Ventas totales</p>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400"><Pencil size={12} /></span>
+            <input type="text" value={`$${formatNum(ventas)}`}
+              onChange={(e) => setVentas(parseFloat(e.target.value.replace(/[^\d.]/g, '')) || 0)}
+              className="kpi-value bg-transparent w-full focus:outline-none focus:text-primary-700 cursor-text" />
           </div>
         </div>
-      </div>
-
-      {/* KPIs editables */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="card py-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Ventas totales</p>
-          <input
-            type="text"
-            value={ventas}
-            onChange={(e) => setVentas(parseFloat(e.target.value.replace(/[^\d.]/g, '')) || 0)}
-            className="text-xl font-bold text-gray-900 mt-1 w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-primary-500 focus:outline-none py-1"
-          />
-        </div>
-        <div className="card py-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Pedidos</p>
-          <input
-            type="text"
-            value={pedidos}
-            onChange={(e) => setPedidos(Number(e.target.value.replace(/\D/g, '')) || 0)}
-            className="text-xl font-bold text-gray-900 mt-1 w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-primary-500 focus:outline-none py-1"
-          />
-        </div>
-        <div className="card py-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Gastos totales</p>
-          <input
-            type="text"
-            value={gastos}
-            onChange={(e) => setGastos(parseFloat(e.target.value.replace(/[^\d.]/g, '')) || 0)}
-            className="text-xl font-bold text-gray-900 mt-1 w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-primary-500 focus:outline-none py-1"
-          />
-        </div>
-        <div className="card py-4 flex flex-col justify-center">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Utilidad neta (Ventas − Gastos)</p>
-          <p className={`text-xl font-bold mt-1 ${utilidadNeta >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            ${formatNum(utilidadNeta)}
-          </p>
-          <Link to="/analisis" className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm mt-2">
-            <BarChart3 size={18} />
-            Ver análisis de datos
-          </Link>
-        </div>
-      </div>
-
-      {/* Cuadro General - tabla editable */}
-      <div className="card overflow-hidden p-0">
-        <div className="px-6 py-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-gray-900">{cuadro.title}</h2>
-          <Link to="/contabilidad" className="text-sm text-primary-600 hover:text-primary-700 font-medium">Ver cuadro completo →</Link>
+        <div className="kpi">
+          <p className="kpi-label">Pedidos</p>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={recalcular}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
-            >
-              <Calculator size={18} />
-              Calcular
-            </button>
-            <Link
-              to="/contabilidad?tab=estado"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50"
-            >
-              <FileSpreadsheet size={18} />
-              Estado de Resultados
-            </Link>
-            <Link
-              to="/analisis"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50"
-            >
-              <BarChart3 size={18} />
-              Análisis
-            </Link>
+            <span className="text-gray-400"><Pencil size={12} /></span>
+            <input type="text" value={pedidos}
+              onChange={(e) => setPedidos(Number(e.target.value.replace(/\D/g, '')) || 0)}
+              className="kpi-value bg-transparent w-full focus:outline-none focus:text-primary-700 cursor-text" />
+          </div>
+        </div>
+        <div className="kpi">
+          <p className="kpi-label">Gastos totales</p>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400"><Pencil size={12} /></span>
+            <input type="text" value={`$${formatNum(gastos)}`}
+              onChange={(e) => setGastos(parseFloat(e.target.value.replace(/[^\d.]/g, '')) || 0)}
+              className="kpi-value bg-transparent w-full focus:outline-none focus:text-primary-700 cursor-text" />
+          </div>
+        </div>
+        <div className="kpi bg-gradient-to-br from-white to-gray-50">
+          <p className="kpi-label">Utilidad neta</p>
+          <p className={`kpi-value ${utilidadNeta >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>${formatNum(utilidadNeta)}</p>
+          <p className="kpi-sub">Ventas - Gastos</p>
+        </div>
+      </div>
+
+      {/* Cuadro General */}
+      <div className="card-flush">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">{cuadro.title}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Haz clic en una celda para editar. Pulsa "Recalcular" para actualizar totales.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/contabilidad" className="btn-ghost text-xs"><FileSpreadsheet size={14} /> Contabilidad</Link>
+            <Link to="/analisis" className="btn-ghost text-xs"><BarChart3 size={14} /> Analisis</Link>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px] text-sm">
             <thead>
-              <tr className="bg-gray-100 border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 sticky left-0 bg-gray-100 z-10">MES</th>
-                <th className="text-right py-3 px-3 font-semibold text-gray-700">Colombia</th>
-                <th className="text-right py-3 px-3 font-semibold text-gray-700">Ecuador</th>
-                <th className="text-right py-3 px-3 font-semibold text-gray-700">España</th>
-                <th className="text-right py-3 px-3 font-semibold text-gray-700">Chile</th>
-                <th className="text-right py-3 px-3 font-semibold text-gray-700">Rep. Dom.</th>
-                <th className="text-right py-3 px-3 font-semibold text-gray-700">Costa Rica</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-900 bg-primary-50">TOTAL PESOS</th>
+              <tr className="table-header">
+                <th className="table-th sticky left-0 bg-gray-50/80 z-10 min-w-[100px]">Mes</th>
+                {COUNTRY_COLS.map((col) => (
+                  <th key={col} className="table-th text-right">{COUNTRY_LABELS[col]}</th>
+                ))}
+                <th className="table-th text-right bg-primary-50/60 font-bold">Total</th>
               </tr>
             </thead>
             <tbody>
               {cuadroRows.map((row, rowIdx) => {
                 const isTotal = row.mes === 'TOTAL'
                 return (
-                  <tr
-                    key={row.mes}
-                    className={`border-b border-gray-100 hover:bg-gray-50/50 ${isTotal ? 'bg-gray-100 font-semibold' : ''}`}
-                  >
-                    <td className="py-2 px-4 text-gray-900 sticky left-0 bg-white border-r border-gray-100 font-medium">
-                      {row.mes}
-                    </td>
+                  <tr key={row.mes} className={`${isTotal ? 'bg-gray-50 font-semibold' : 'table-row'}`}>
+                    <td className="table-td font-medium text-gray-900 sticky left-0 bg-white z-[5] border-r border-gray-100">{row.mes}</td>
                     {COUNTRY_COLS.map((col) => (
-                      <td key={col} className="text-right py-1 px-2 tabular-nums text-gray-700">
+                      <td key={col} className="text-right py-1 px-1.5 tabular-nums">
                         {isTotal ? (
-                          formatNum(row[col])
+                          <span className="px-2 py-1.5 text-sm font-semibold text-gray-900">{formatNum(row[col])}</span>
                         ) : (
-                          <input
-                            type="text"
-                            value={row[col] ?? ''}
+                          <input type="text" value={row[col] ?? ''}
                             onChange={(e) => {
                               const v = e.target.value.replace(/,/g, '')
-                              const num = v === '' ? 0 : parseFloat(v)
-                              handleCellChange(rowIdx, col, isNaN(num) ? 0 : num)
+                              handleCellChange(rowIdx, col, v === '' ? 0 : (isNaN(parseFloat(v)) ? 0 : parseFloat(v)))
                             }}
-                            className="w-full min-w-[4rem] text-right py-1 px-2 rounded border border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-transparent text-sm"
-                          />
+                            className="w-full min-w-[3.5rem] text-right py-1.5 px-2 rounded-md border border-transparent text-sm text-gray-700 bg-transparent hover:bg-gray-50 hover:border-gray-200 focus:bg-white focus:border-primary-400 focus:ring-1 focus:ring-primary-400/30 focus:outline-none transition-all" />
                         )}
                       </td>
                     ))}
-                    <td className="text-right py-2 px-4 tabular-nums font-medium text-gray-900 bg-primary-50/30">
+                    <td className="text-right py-2 px-4 tabular-nums font-semibold text-gray-900 bg-primary-50/30">
                       {row.totalPesos !== undefined ? formatNum(row.totalPesos) : '-'}
                     </td>
                   </tr>
@@ -335,70 +201,89 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Accesos rápidos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Link to="/orders" className="card hover:shadow-lg transition-shadow flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <ShoppingBag className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">Pedidos</h3>
-            <p className="text-sm text-gray-500">{orders.length} pedidos</p>
-          </div>
-        </Link>
-        <Link to="/contabilidad?tab=estado" className="card hover:shadow-lg transition-shadow flex items-center gap-4">
-          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-            <Calculator className="w-6 h-6 text-purple-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">Estado de Resultados</h3>
-            <p className="text-sm text-gray-500">Por país y mes</p>
-          </div>
-        </Link>
-        <Link to="/analisis" className="card hover:shadow-lg transition-shadow flex items-center gap-4">
-          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-            <BarChart3 className="w-6 h-6 text-green-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">Análisis de datos</h3>
-            <p className="text-sm text-gray-500">Gráficas y tendencias</p>
-          </div>
-        </Link>
-        {(role === 'administrador' || role === 'superadmin') && (
-          <Link to="/gestion-usuarios" className="card hover:shadow-lg transition-shadow flex items-center gap-4">
-            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-amber-600" />
+      {/* Accesos rapidos + Red de socios */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { to: '/orders', icon: ShoppingBag, color: 'bg-blue-50 text-blue-600', label: 'Pedidos', sub: `${orders.length} pedidos` },
+          { to: '/contabilidad', icon: FileSpreadsheet, color: 'bg-purple-50 text-purple-600', label: 'Contabilidad', sub: 'Cuadro y resultados' },
+          { to: '/analisis', icon: BarChart3, color: 'bg-emerald-50 text-emerald-600', label: 'Analisis', sub: 'Graficas y tendencias' },
+          { to: '/configuracion', icon: Settings, color: 'bg-amber-50 text-amber-600', label: 'Configuracion', sub: 'Usuarios y tasas' },
+        ].map((item) => (
+          <Link key={item.to} to={item.to} className="card flex items-center gap-4 hover:shadow-md hover:border-gray-300 transition-all group">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.color}`}>
+              <item.icon size={20} />
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Gestión de usuarios</h3>
-              <p className="text-sm text-gray-500">Administrar roles y accesos</p>
+            <div className="min-w-0">
+              <p className="font-semibold text-gray-900 text-sm group-hover:text-primary-700 transition-colors">{item.label}</p>
+              <p className="text-xs text-gray-500 truncate">{item.sub}</p>
             </div>
           </Link>
-        )}
+        ))}
+      </div>
+
+      {/* Inversionistas + Empresarios */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="card">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
+              <Users size={18} className="text-purple-600" />
+            </div>
+            <h3 className="font-semibold text-gray-900 text-sm">Inversionistas</h3>
+          </div>
+          <div className="space-y-2.5 mb-4">
+            {[
+              { label: 'Pedidos totales', value: String(orders.length) },
+              { label: 'Paises con pedidos', value: String(new Set(orders.map((o) => o.countryCode)).size) },
+              { label: 'Ticket promedio', value: `$${orders.length ? Math.round(orders.reduce((s, o) => s + o.totalAmount, 0) / orders.length) : 0}` },
+            ].map((k) => (
+              <div key={k.label} className="flex justify-between text-sm">
+                <span className="text-gray-500">{k.label}</span>
+                <span className="font-semibold text-gray-900 tabular-nums">{k.value}</span>
+              </div>
+            ))}
+          </div>
+          <Link to="/inversionistas" className="btn-ghost text-xs w-full justify-center">Ver inversionistas <ArrowRight size={14} /></Link>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <Store size={18} className="text-emerald-600" />
+            </div>
+            <h3 className="font-semibold text-gray-900 text-sm">Empresarios</h3>
+          </div>
+          <div className="space-y-2.5 mb-4">
+            {[
+              { label: 'Pedidos totales', value: String(orders.length) },
+              { label: 'Ventas totales', value: `$${orders.reduce((s, o) => s + o.totalAmount, 0).toLocaleString('es-ES', { maximumFractionDigits: 0 })}` },
+              { label: 'Paises activos', value: String(new Set(orders.map((o) => o.countryCode)).size) },
+            ].map((k) => (
+              <div key={k.label} className="flex justify-between text-sm">
+                <span className="text-gray-500">{k.label}</span>
+                <span className="font-semibold text-gray-900 tabular-nums">{k.value}</span>
+              </div>
+            ))}
+          </div>
+          <Link to="/empresarios" className="btn-ghost text-xs w-full justify-center">Ver empresarios <ArrowRight size={14} /></Link>
+        </div>
       </div>
 
       {/* Pedidos recientes */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Pedidos Recientes</h2>
-          <Link to="/orders" className="text-sm text-primary-600 hover:text-primary-700 font-medium">Ver todos →</Link>
+          <h2 className="text-base font-semibold text-gray-900">Pedidos recientes</h2>
+          <Link to="/orders" className="btn-ghost text-xs">Ver todos <ArrowRight size={14} /></Link>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {stats.recentOrders.slice(0, 5).map((order) => (
-            <Link
-              key={order.id}
-              to={`/orders/${order.id}`}
-              className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-gray-50 border border-gray-100"
-            >
+            <Link key={order.id} to={`/orders/${order.id}`}
+              className="flex items-center justify-between py-3 px-4 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group">
               <div>
-                <p className="font-medium text-gray-900">#{order.orderNumber}</p>
-                <p className="text-sm text-gray-500">{order.customerName} • {order.country}</p>
+                <p className="text-sm font-medium text-gray-900 group-hover:text-primary-700 transition-colors">#{order.orderNumber}</p>
+                <p className="text-xs text-gray-500">{order.customerName} · {order.country}</p>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-900">
-                  {order.currency} {order.totalAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-gray-500">{format(new Date(order.createdAt), 'dd MMM')}</p>
+                <p className="text-sm font-semibold text-gray-900 tabular-nums">{order.currency} {order.totalAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</p>
+                <p className="text-xs text-gray-400">{format(new Date(order.createdAt), 'dd MMM')}</p>
               </div>
             </Link>
           ))}

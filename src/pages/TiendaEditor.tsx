@@ -178,7 +178,7 @@ export default function TiendaEditor() {
           </div>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            <Link to="/empresarios/tienda" className="hover:text-gray-700 underline">
+            <Link to="/mi-tienda" className="hover:text-gray-700 underline">
               Volver a la tienda
             </Link>
           </p>
@@ -192,7 +192,7 @@ export default function TiendaEditor() {
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/98 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-14 min-h-[3.5rem] max-w-4xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
           <Link
-            to="/empresarios/tienda"
+            to="/mi-tienda"
             className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 -ml-2 transition-colors sm:min-w-0 sm:justify-start sm:px-3"
           >
             <ArrowLeft size={22} />

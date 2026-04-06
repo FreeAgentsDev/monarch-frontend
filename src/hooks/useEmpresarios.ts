@@ -6,31 +6,25 @@ function makeId() {
 }
 
 const DEFAULT_EMPRESARIOS: Empresario[] = [
-  {
-    id: 'e1',
-    nombre: 'María Gómez',
-    email: 'maria@demo.com',
-    telefono: '+57 300 000 0001',
-    activo: true,
-    notas: 'Empresaria demo',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'e2',
-    nombre: 'Carlos Ruiz',
-    email: 'carlos@demo.com',
-    telefono: '+57 300 000 0002',
-    activo: true,
-    notas: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
+  { id: 'e1', nombre: 'Maria Gomez', marca: 'Juacho Jewelry', email: 'maria@juacho.com', telefono: '+57 300 111 2233', paisCodigo: 'CO', activo: true, notas: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'e2', nombre: 'Carlos Ruiz', marca: 'Brilla EC', email: 'carlos@brillaec.com', telefono: '+593 99 876 5432', paisCodigo: 'EC', activo: true, notas: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'e3', nombre: 'Ana Lopez', marca: 'Oro Madrid', email: 'ana@oromadrid.es', telefono: '+34 612 345 678', paisCodigo: 'ES', activo: true, notas: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'e4', nombre: 'Pedro Martinez', marca: 'Lux Bogota', email: 'pedro@luxbogota.co', telefono: '+57 310 222 3344', paisCodigo: 'CO', activo: true, notas: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'e5', nombre: 'Laura Vega', marca: 'Joyeria Quito', email: 'laura@joyeriaquito.ec', telefono: '+593 98 765 4321', paisCodigo: 'EC', activo: false, notas: 'En pausa', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'e6', nombre: 'Diego Herrera', marca: 'Brillantes CL', email: 'diego@brillantes.cl', telefono: '+56 9 1234 5678', paisCodigo: 'CL', activo: true, notas: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ]
 
 export function useEmpresarios() {
   const [empresarios, setEmpresarios] = useState<Empresario[]>(() => {
-    return demoStorage.get<Empresario[]>(STORAGE_KEYS.EMPRESARIOS) ?? DEFAULT_EMPRESARIOS
+    const stored = demoStorage.get<Empresario[]>(STORAGE_KEYS.EMPRESARIOS)
+    if (!stored) return DEFAULT_EMPRESARIOS
+    // Si hay datos viejos sin paisCodigo/marca, resetear a defaults
+    const hasOldData = stored.some((e) => !e.paisCodigo || !e.marca)
+    if (hasOldData) {
+      demoStorage.remove(STORAGE_KEYS.EMPRESARIOS)
+      return DEFAULT_EMPRESARIOS
+    }
+    return stored
   })
 
   useEffect(() => {

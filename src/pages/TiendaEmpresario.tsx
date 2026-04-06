@@ -170,7 +170,7 @@ export default function TiendaEmpresario() {
       <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-14 min-h-[3.5rem] max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6 lg:px-8">
           <Link
-            to="/empresarios/tienda"
+            to="/mi-tienda"
             className="flex min-h-[44px] min-w-[44px] items-center gap-3 rounded-lg active:opacity-80 sm:min-w-0"
             onClick={() => setMenuOpen(false)}
           >
@@ -225,7 +225,7 @@ export default function TiendaEmpresario() {
               )}
             </button>
             <Link
-              to="/empresarios/panel"
+              to="/mi-panel"
               className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 active:bg-slate-100"
             >
               <ShoppingBag size={18} className="shrink-0" />
@@ -268,7 +268,7 @@ export default function TiendaEmpresario() {
                 </a>
               ))}
               <Link
-                to="/empresarios/panel"
+                to="/mi-panel"
                 onClick={() => setMenuOpen(false)}
                 className="min-h-[48px] rounded-xl px-4 py-3 text-base font-medium text-slate-700 active:bg-slate-100"
               >
@@ -317,7 +317,7 @@ export default function TiendaEmpresario() {
                   Ver catálogo
                 </a>
                 <Link
-                  to="/empresarios/vista/EC"
+                  to="/catalogo/EC"
                   className="inline-flex min-h-[48px] items-center justify-center rounded-xl border-2 border-slate-500/60 bg-transparent px-6 py-3.5 text-sm font-semibold text-white transition-all hover:border-slate-400 hover:bg-slate-800/50 active:scale-[0.98]"
                 >
                   Descargar catálogo
@@ -448,23 +448,23 @@ export default function TiendaEmpresario() {
                 </h4>
                 <ul className="mt-4 space-y-3 text-sm">
                   <li>
-                    <Link to="/empresarios/panel" className="text-slate-400 transition-colors hover:text-white">
+                    <Link to="/mi-panel" className="text-slate-400 transition-colors hover:text-white">
                       Panel del empresario
                     </Link>
                   </li>
                   <li>
-                    <Link to="/empresarios/tienda/editor" className="text-slate-400 transition-colors hover:text-white">
+                    <Link to="/mi-tienda/editor" className="text-slate-400 transition-colors hover:text-white">
                       Editar tienda
                     </Link>
                   </li>
                   <li>
-                    <Link to="/empresarios/vista/EC" className="text-slate-400 transition-colors hover:text-white">
+                    <Link to="/catalogo/EC" className="text-slate-400 transition-colors hover:text-white">
                       Descargar catálogo
                     </Link>
                   </li>
                   <li>
-                    <Link to="/avance-semana" className="text-slate-400 transition-colors hover:text-white">
-                      Avance de la semana
+                    <Link to="/mi-panel" className="text-slate-400 transition-colors hover:text-white">
+                      Mi Panel
                     </Link>
                   </li>
                 </ul>

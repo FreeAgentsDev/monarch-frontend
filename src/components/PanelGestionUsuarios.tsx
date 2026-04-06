@@ -4,8 +4,7 @@ import { demoStorage, STORAGE_KEYS, DEFAULT_USUARIOS, UsuarioSistema, RolUsuario
 import { isValidEmail, inputErrorClass } from '../utils/formValidation'
 
 const ROL_LABELS: Record<RolUsuario, string> = {
-  superadmin: 'Superadmin',
-  administrador: 'Administrador',
+  admin: 'Admin',
   inversionista: 'Inversionista',
   empresario: 'Empresario',
 }
@@ -24,7 +23,7 @@ export default function PanelGestionUsuarios() {
   const [form, setForm] = useState<Partial<UsuarioSistema>>({
     nombre: '',
     email: '',
-    rol: 'administrador',
+    rol: 'admin',
     activo: true,
   })
   const [formErrors, setFormErrors] = useState<{ nombre?: string; email?: string; rol?: string }>({})
@@ -57,7 +56,7 @@ export default function PanelGestionUsuarios() {
         updatedAt: now,
       }
       setUsuarios((prev) => [...prev, nuevo])
-      setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+      setForm({ nombre: '', email: '', rol: 'admin', activo: true })
       setFormErrors({})
       setIsAdding(false)
     } else if (editingId) {
@@ -69,7 +68,7 @@ export default function PanelGestionUsuarios() {
         )
       )
       setEditingId(null)
-      setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+      setForm({ nombre: '', email: '', rol: 'admin', activo: true })
       setFormErrors({})
     }
   }, [form, isAdding, editingId])
@@ -91,7 +90,7 @@ export default function PanelGestionUsuarios() {
       setUsuarios((prev) => prev.filter((x) => x.id !== u.id))
       if (editingId === u.id) {
         setEditingId(null)
-        setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+        setForm({ nombre: '', email: '', rol: 'admin', activo: true })
       }
     }
   }, [editingId])
@@ -100,7 +99,7 @@ export default function PanelGestionUsuarios() {
     setEditingId(null)
     setIsAdding(false)
     setFormErrors({})
-    setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+    setForm({ nombre: '', email: '', rol: 'admin', activo: true })
   }, [])
 
   return (
@@ -120,7 +119,7 @@ export default function PanelGestionUsuarios() {
           onClick={() => {
             setIsAdding(true)
             setEditingId(null)
-            setForm({ nombre: '', email: '', rol: 'administrador', activo: true })
+            setForm({ nombre: '', email: '', rol: 'admin', activo: true })
             setFormErrors({})
           }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
@@ -225,9 +224,7 @@ export default function PanelGestionUsuarios() {
                 <td className="py-3 px-4">
                   <span
                     className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      u.rol === 'superadmin'
-                        ? 'bg-amber-100 text-amber-800'
-                        : u.rol === 'administrador'
+                      u.rol === 'admin'
                         ? 'bg-blue-100 text-blue-800'
                         : u.rol === 'inversionista'
                         ? 'bg-purple-100 text-purple-800'

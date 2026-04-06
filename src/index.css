@@ -8,21 +8,22 @@
   }
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
   h1 {
-    @apply text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl;
+    @apply text-2xl font-bold tracking-tight text-gray-900;
   }
   h2 {
-    @apply text-xl font-semibold text-gray-900 sm:text-2xl;
-  }
-  h3, h4, h5, h6 {
-    @apply text-base font-semibold text-gray-900;
+    @apply text-lg font-semibold text-gray-900;
   }
   a {
-    @apply text-primary-600 hover:text-primary-700 hover:underline;
+    @apply text-primary-600 hover:text-primary-700 transition-colors;
+  }
+  a:not(.btn-primary):not(.btn-secondary):not(.btn-ghost):not([class*="rounded-lg"]):not([class*="rounded-xl"]) {
+    @apply hover:underline;
   }
   :focus-visible {
-    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+    @apply outline-none ring-2 ring-primary-500/40 ring-offset-1;
   }
 }
 
@@ -30,22 +31,126 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer components {
+  /* Layout */
   .container-app {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
+
+  /* Cards */
   .card {
-    @apply rounded-xl border border-gray-200 bg-white p-6 shadow-sm;
+    @apply rounded-xl border border-gray-200 bg-white p-5 shadow-sm;
   }
+  .card-flush {
+    @apply rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden;
+  }
+
+  /* KPI card */
+  .kpi {
+    @apply rounded-xl border border-gray-200 bg-white px-5 py-4;
+  }
+  .kpi-label {
+    @apply text-xs font-medium uppercase tracking-wider text-gray-500;
+  }
+  .kpi-value {
+    @apply mt-1 text-2xl font-bold text-gray-900 tabular-nums;
+  }
+  .kpi-sub {
+    @apply mt-0.5 text-xs text-gray-500;
+  }
+
+  /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed;
   }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-gray-100 hover:text-gray-900;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-all hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 focus:ring-offset-1;
+  }
+
+  /* Inputs */
   .input {
-    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20;
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20;
+  }
+  .input-search {
+    @apply w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:bg-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-green {
+    @apply badge bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20;
+  }
+  .badge-red {
+    @apply badge bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20;
+  }
+  .badge-amber {
+    @apply badge bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20;
+  }
+  .badge-blue {
+    @apply badge bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20;
+  }
+  .badge-gray {
+    @apply badge bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/20;
+  }
+
+  /* Tables */
+  .table-header {
+    @apply border-b border-gray-200 bg-gray-50/80;
+  }
+  .table-th {
+    @apply py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500;
+  }
+  .table-td {
+    @apply py-3.5 px-4 text-sm text-gray-700;
+  }
+  .table-row {
+    @apply border-b border-gray-100 transition-colors hover:bg-gray-50/60;
+  }
+
+  /* Page header */
+  .page-header {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between;
+  }
+  .page-title {
+    @apply text-2xl font-bold tracking-tight text-gray-900;
+  }
+  .page-subtitle {
+    @apply mt-1 text-sm text-gray-500;
+  }
+
+  /* Tabs */
+  .tab-nav {
+    @apply flex gap-1 border-b border-gray-200 overflow-x-auto scrollbar-hide;
+  }
+  .tab-btn {
+    @apply inline-flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors;
+  }
+  .tab-active {
+    @apply border-primary-600 text-primary-600;
+  }
+  .tab-inactive {
+    @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+  }
+
+  /* Section divider */
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-gray-400;
   }
 }

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 
-export type Role = 'superadmin' | 'administrador' | 'inversionista' | 'empresario'
+export type Role = 'admin' | 'inversionista' | 'empresario'
 
 export interface User {
   id: string
@@ -12,8 +12,7 @@ export interface User {
 
 /** Credenciales por rol: cada rol tiene su propio usuario y contraseña */
 const CREDENTIALS_BY_ROLE: Record<Role, { username: string; password: string }> = {
-  superadmin: { username: 'superadmin', password: 'superadmin123' },
-  administrador: { username: 'admin', password: 'admin123' },
+  admin: { username: 'admin', password: 'admin123' },
   inversionista: { username: 'inversionista', password: 'inversionista123' },
   empresario: { username: 'empresario', password: 'empresario123' },
 }
@@ -33,7 +32,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(null)
-  const [role, setRoleState] = useState<Role>('administrador')
+  const [role, setRoleState] = useState<Role>('admin')
 
   const setUser = useCallback((u: User | null) => {
     setUserState(u)
@@ -42,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setUserState(null)
-    setRoleState('administrador')
+    setRoleState('admin')
   }, [])
 
   const login = useCallback((selectedRole: Role, username: string, password: string): { ok: boolean; error?: string } => {
@@ -93,10 +92,10 @@ export function useAuth() {
 }
 
 export function canAccess(role: Role, path: string): boolean {
-  const inversionistaPaths = ['/inversionistas/panel', '/inversionistas/vista', '/rutas-entregas', '/gestion-inversionistas', '/estado-resultados']
-  const empresarioPaths = ['/empresarios/panel', '/empresarios/tienda', '/empresarios/tienda/editor', '/empresarios/pedidos', '/empresarios/vista', '/rutas-entregas', '/gestion-empresarios', '/estado-resultados', '/avance-semana']
+  const inversionistaPaths = ['/mi-panel', '/catalogo', '/crear-pedido']
+  const empresarioPaths = ['/mi-panel', '/mi-tienda', '/catalogo', '/crear-pedido']
 
-  if (role === 'superadmin' || role === 'administrador') return true
+  if (role === 'admin') return true
   if (role === 'inversionista') return inversionistaPaths.some((p) => path.startsWith(p))
   if (role === 'empresario') return empresarioPaths.some((p) => path.startsWith(p))
   return false

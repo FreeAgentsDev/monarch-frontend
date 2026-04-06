@@ -4,10 +4,9 @@ import { Lock, User, LogIn } from 'lucide-react'
 import { useAuth, type Role } from '../context/AuthContext'
 
 const HOME_BY_ROLE: Record<Role, string> = {
-  superadmin: '/dashboard',
-  administrador: '/dashboard',
-  inversionista: '/inversionistas/panel',
-  empresario: '/avance-semana',
+  admin: '/dashboard',
+  inversionista: '/mi-panel',
+  empresario: '/mi-panel',
 }
 
 export default function Login() {
@@ -30,7 +29,7 @@ export default function Login() {
       navigate(HOME_BY_ROLE[result.role], { replace: true })
       return
     }
-    setError(result.error ?? 'Error al iniciar sesión.')
+    setError(result.error ?? 'Error al iniciar sesion.')
   }
 
   return (
@@ -42,11 +41,11 @@ export default function Login() {
               <span className="text-2xl font-bold">M</span>
             </div>
             <h1 className="text-xl font-bold text-gray-900">Monarch</h1>
-            <p className="text-sm text-gray-500 mt-1">Sistema de Gestión Internacional</p>
+            <p className="text-sm text-gray-500 mt-1">Sistema de Gestion Internacional</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-5">
-            <h2 className="text-lg font-semibold text-gray-900">Iniciar sesión</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Iniciar sesion</h2>
 
             {error && (
               <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
@@ -74,7 +73,7 @@ export default function Login() {
 
             <div>
               <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Contraseña
+                Contrasena
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -109,9 +108,9 @@ export default function Login() {
 
         <div className="mt-6 rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-left text-xs text-gray-600 max-w-md mx-auto space-y-1">
           <p className="font-semibold text-gray-800">Credenciales (demo)</p>
-          <p>Usuario = nombre del rol o cuenta. Contraseña = mismo nombre + <strong>123</strong>.</p>
-          <p>Ej.: <code className="rounded bg-gray-100 px-1">empresario</code> / <code className="rounded bg-gray-100 px-1">empresario123</code></p>
-          <p className="text-gray-500">superadmin · admin · inversionista · empresario</p>
+          <p><code className="rounded bg-gray-100 px-1">admin</code> / <code className="rounded bg-gray-100 px-1">admin123</code></p>
+          <p><code className="rounded bg-gray-100 px-1">inversionista</code> / <code className="rounded bg-gray-100 px-1">inversionista123</code></p>
+          <p><code className="rounded bg-gray-100 px-1">empresario</code> / <code className="rounded bg-gray-100 px-1">empresario123</code></p>
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-4">
