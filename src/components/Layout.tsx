@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { demoStorage } from '../utils/storage'
 import { useAuth, type Role } from '../context/AuthContext'
 import {
@@ -16,7 +16,8 @@ import {
   Settings,
   Truck,
   UserCircle,
-  ChevronDown,
+  Shield,
+  LogOut,
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -32,20 +33,26 @@ const ALL_NAV: { name: string; href: string; icon: typeof LayoutDashboard; roles
   { name: 'Análisis de datos', href: '/analisis', icon: BarChart3, roles: ['superadmin', 'administrador', 'inversionista'] },
   { name: 'Inversionistas', href: '/inversionistas', icon: Users, roles: ['superadmin', 'administrador', 'inversionista'] },
   { name: 'Vista por país (catálogo)', href: '/inversionistas/vista/EC', icon: Store, roles: ['superadmin', 'administrador', 'inversionista'] },
+  { name: 'Panel inversionista', href: '/inversionistas/panel', icon: BarChart3, roles: ['superadmin', 'administrador', 'inversionista'] },
   { name: 'Avance de la semana', href: '/avance-semana', icon: BarChart3, roles: ['superadmin', 'administrador', 'inversionista', 'empresario'] },
+  { name: 'Mi tienda (empresario)', href: '/empresarios/tienda', icon: Store, roles: ['superadmin', 'administrador', 'empresario'] },
+  { name: 'Panel empresario', href: '/empresarios/panel', icon: UserCircle, roles: ['superadmin', 'administrador', 'empresario'] },
+  { name: 'Vista por país (empresario)', href: '/empresarios/vista/EC', icon: Store, roles: ['superadmin', 'administrador', 'empresario'] },
   { name: 'Mis pedidos (empresarios)', href: '/empresarios/pedidos', icon: ShoppingBag, roles: ['superadmin', 'administrador', 'empresario'] },
+  { name: 'Gestionar empresarios', href: '/gestion-empresarios', icon: Users, roles: ['superadmin', 'administrador'] },
   { name: 'Rutas (Ecuador)', href: '/rutas-entregas', icon: Truck, roles: ['superadmin', 'administrador'] },
   { name: 'Gestionar países', href: '/gestion-paises', icon: MapPin, roles: ['superadmin', 'administrador'] },
   { name: 'Gestionar inversionistas', href: '/gestion-inversionistas', icon: Users, roles: ['superadmin', 'administrador'] },
+  { name: 'Gestión de usuarios', href: '/gestion-usuarios', icon: Shield, roles: ['superadmin', 'administrador'] },
   { name: 'Configuración', href: '/configuracion', icon: Settings, roles: ['superadmin', 'administrador'] },
   { name: 'Shopify', href: '/shopify', icon: Store, roles: ['superadmin', 'administrador'] },
 ]
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false)
-  const { user, role, setRole } = useAuth()
+  const { user, role, logout } = useAuth()
 
   const navigation = ALL_NAV.filter((item) => item.roles.includes(role))
 
@@ -57,6 +64,7 @@ export default function Layout({ children }: LayoutProps) {
     }
     const pathBase = path.split('?')[0]
     if (pathBase === '/inversionistas/vista') return location.pathname.startsWith('/inversionistas/vista')
+    if (pathBase === '/empresarios/vista') return location.pathname.startsWith('/empresarios/vista')
     return location.pathname === pathBase
   }
 
@@ -153,35 +161,24 @@ export default function Layout({ children }: LayoutProps) {
             <Menu size={24} />
           </button>
           <div className="flex-1" />
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setRoleDropdownOpen((v) => !v)}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 hover:bg-gray-50"
-              >
-                <UserCircle size={18} />
-                {user?.name ?? 'Usuario'} · <span className="font-medium">{roleLabels[role]}</span>
-                <ChevronDown size={16} />
-              </button>
-              {roleDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setRoleDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-1 py-1 w-48 bg-white rounded-lg border border-gray-200 shadow-lg z-20">
-                    {(['superadmin', 'administrador', 'inversionista', 'empresario'] as Role[]).map((r) => (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => { setRole(r); setRoleDropdownOpen(false) }}
-                        className={`w-full text-left px-4 py-2 text-sm ${role === r ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
-                      >
-                        {roleLabels[r]}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+              <UserCircle size={18} className="text-gray-500 shrink-0" />
+              <span className="hidden sm:inline font-medium text-gray-900">{user?.name ?? 'Usuario'}</span>
+              <span className="text-gray-400 hidden sm:inline">·</span>
+              <span className="font-medium text-primary-700">{roleLabels[role]}</span>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                logout()
+                navigate('/login', { replace: true })
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <LogOut size={18} />
+              <span className="hidden sm:inline">Salir</span>
+            </button>
           </div>
         </header>
 

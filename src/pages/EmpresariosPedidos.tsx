@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ordersApi } from '../services/api'
 import type { Order } from '../services/api'
-import { ShoppingBag, Plus, ArrowLeft, Package } from 'lucide-react'
+import { Plus, ArrowLeft, Package } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export default function EmpresariosPedidos() {
@@ -39,13 +39,13 @@ export default function EmpresariosPedidos() {
       </div>
 
       <div className="flex justify-end">
-        <button
-          type="button"
+        <Link
+          to="/empresarios/panel?tab=crear"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700"
         >
           <Plus size={18} />
           Nuevo pedido
-        </button>
+        </Link>
       </div>
 
       {loading ? (

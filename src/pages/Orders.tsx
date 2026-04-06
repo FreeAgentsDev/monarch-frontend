@@ -20,6 +20,53 @@ const statusLabels = {
   cancelled: 'Cancelado',
 }
 
+function csvEscape(value: string | number): string {
+  const s = String(value)
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  return s
+}
+
+function downloadOrdersCsv(rows: Order[]) {
+  const headers = [
+    'Número pedido',
+    'Tienda',
+    'Cliente',
+    'Email',
+    'País',
+    'Código país',
+    'Moneda',
+    'Monto',
+    'Estado',
+    'Fecha',
+  ]
+  const lines = [
+    headers.map(csvEscape).join(','),
+    ...rows.map((o) =>
+      [
+        o.orderNumber,
+        o.storeName,
+        o.customerName,
+        o.customerEmail,
+        o.country,
+        o.countryCode,
+        o.currency,
+        o.totalAmount.toFixed(2),
+        statusLabels[o.status],
+        format(new Date(o.createdAt), 'yyyy-MM-dd'),
+      ]
+        .map(csvEscape)
+        .join(',')
+    ),
+  ]
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `pedidos_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,7 +120,13 @@ export default function Orders() {
             {filteredOrders.length} pedido{filteredOrders.length !== 1 ? 's' : ''} encontrado{filteredOrders.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button className="btn-primary flex items-center space-x-2">
+        <button
+          type="button"
+          className="btn-primary flex items-center space-x-2"
+          onClick={() => downloadOrdersCsv(filteredOrders)}
+          disabled={filteredOrders.length === 0}
+          title={filteredOrders.length === 0 ? 'No hay pedidos para exportar' : 'Descargar CSV de la vista actual'}
+        >
           <Download size={18} />
           <span>Exportar</span>
         </button>

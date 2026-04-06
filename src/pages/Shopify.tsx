@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Store, RefreshCw, CheckCircle, XCircle, Clock, Globe, ShoppingBag } from 'lucide-react'
+import { Store, RefreshCw, CheckCircle, XCircle, Clock, Globe, ShoppingBag, X } from 'lucide-react'
 import { shopifyApi, Shop } from '../services/api'
 import { format } from 'date-fns'
 
@@ -19,6 +19,8 @@ export default function Shopify() {
   const [shops, setShops] = useState<Shop[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState<string | null>(null)
+  const [addStoreOpen, setAddStoreOpen] = useState(false)
+  const [detailShop, setDetailShop] = useState<Shop | null>(null)
 
   useEffect(() => {
     loadShops()
@@ -68,7 +70,11 @@ export default function Shopify() {
             Gestiona y monitorea tus tiendas Shopify conectadas
           </p>
         </div>
-        <button className="btn-primary flex items-center space-x-2">
+        <button
+          type="button"
+          className="btn-primary flex items-center space-x-2"
+          onClick={() => setAddStoreOpen(true)}
+        >
           <Store size={18} />
           <span>Agregar Tienda</span>
         </button>
@@ -197,7 +203,11 @@ export default function Shopify() {
                   />
                   <span>{syncing === shop.id ? 'Sincronizando...' : 'Sincronizar'}</span>
                 </button>
-                <button className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setDetailShop(shop)}
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
                   Ver Detalles
                 </button>
               </div>
@@ -205,6 +215,104 @@ export default function Shopify() {
           )
         })}
       </div>
+
+      {addStoreOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Agregar tienda Shopify</h3>
+              <button
+                type="button"
+                onClick={() => setAddStoreOpen(false)}
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                aria-label="Cerrar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-3 text-sm text-gray-600">
+              <p>
+                Esta acción conectará una nueva tienda mediante <strong className="text-gray-800">OAuth de Shopify</strong> y
+                registrará webhooks de pedidos. La integración real está prevista para una fase posterior del proyecto.
+              </p>
+              <p className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 text-amber-900">
+                Vista previa: no se guarda ninguna credencial. Cuando esté disponible, aquí podrás iniciar el flujo de instalación de la app.
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
+              <button type="button" className="btn-secondary" onClick={() => setAddStoreOpen(false)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {detailShop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">{detailShop.shopifyStoreName}</h3>
+                <p className="text-sm text-gray-500 truncate">{detailShop.shopifyDomain}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetailShop(null)}
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 shrink-0"
+                aria-label="Cerrar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <dl className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <dt className="text-gray-500">País</dt>
+                <dd className="font-medium text-gray-900 mt-0.5">{detailShop.country} ({detailShop.countryCode})</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Moneda</dt>
+                <dd className="font-medium text-gray-900 mt-0.5">{detailShop.currency}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Zona horaria</dt>
+                <dd className="font-medium text-gray-900 mt-0.5">{detailShop.timezone}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Estado</dt>
+                <dd className="font-medium text-gray-900 mt-0.5">{detailShop.isActive ? 'Activa' : 'Inactiva'}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Pedidos (conteo demo)</dt>
+                <dd className="font-medium text-gray-900 mt-0.5">{detailShop.ordersCount.toLocaleString('es-ES')}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Sincronización</dt>
+                <dd className="font-medium text-gray-900 mt-0.5">
+                  {detailShop.syncStatus === 'success'
+                    ? 'Conectado'
+                    : detailShop.syncStatus === 'error'
+                      ? 'Error'
+                      : 'Sincronizando'}
+                </dd>
+              </div>
+              <div className="sm:col-span-2">
+                <dt className="text-gray-500">Última sincronización</dt>
+                <dd className="font-medium text-gray-900 mt-0.5">
+                  {detailShop.lastSyncAt
+                    ? format(new Date(detailShop.lastSyncAt), "dd MMM yyyy, HH:mm")
+                    : 'Nunca'}
+                </dd>
+              </div>
+            </dl>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+              <button type="button" className="btn-primary" onClick={() => setDetailShop(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Info Box */}
       <div className="card bg-blue-50 border-blue-200">

@@ -15,6 +15,9 @@ export const STORAGE_KEYS = {
   PAISES: `${PREFIX}paises`,
   INVERSIONISTAS: `${PREFIX}inversionistas`,
   INVERSIONISTA_TIENDAS: `${PREFIX}inversionista-tiendas`,
+  EMPRESARIOS: `${PREFIX}empresarios`,
+  TIENDA_EMPRESARIO: `${PREFIX}tienda-empresario`,
+  USUARIOS: `${PREFIX}usuarios`,
 } as const
 
 export const DEFAULT_EXCHANGE_RATES: Record<string, number> = {
@@ -88,6 +91,54 @@ export interface InversionistaTienda {
   storeName?: string
   activo: boolean
 }
+
+export interface Empresario {
+  id: string
+  nombre: string
+  email: string
+  telefono?: string
+  activo: boolean
+  notas?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ProductoTienda {
+  sku: string
+  nombre: string
+  categoria: string
+  precio: number
+  moneda: string
+  descripcion: string
+  imagen: string
+}
+
+export interface TiendaConfig {
+  nombreTienda: string
+  logoUrl: string | null
+  heroTitulo: string
+  heroDescripcion: string
+  productos: ProductoTienda[]
+}
+
+export type RolUsuario = 'superadmin' | 'administrador' | 'inversionista' | 'empresario'
+
+export interface UsuarioSistema {
+  id: string
+  nombre: string
+  email: string
+  rol: RolUsuario
+  activo: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export const DEFAULT_USUARIOS: UsuarioSistema[] = [
+  { id: 'u1', nombre: 'Super Admin', email: 'superadmin@monarch.com', rol: 'superadmin', activo: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'u2', nombre: 'Admin', email: 'admin@monarch.com', rol: 'administrador', activo: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'u3', nombre: 'Inversionista Demo', email: 'inversionista@monarch.com', rol: 'inversionista', activo: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'u4', nombre: 'Empresario Demo', email: 'empresario@monarch.com', rol: 'empresario', activo: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+]
 
 export const DEFAULT_PAISES: Pais[] = [
   { id: 'p1', codigo: 'CO', nombre: 'Colombia', moneda: 'COP', activo: true, orden: 1 },

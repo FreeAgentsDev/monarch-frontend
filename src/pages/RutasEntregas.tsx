@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin, Truck, Package, ChevronRight } from 'lucide-react'
+import { MapPin, Truck, Package, ChevronRight, X } from 'lucide-react'
 
 const RUTAS_ECUADOR = [
   { id: '1', nombre: 'Quito - Norte', zonas: ['La Carolina', 'Iñaquito', ' González Suárez'], pedidos: 24 },
@@ -7,9 +8,13 @@ const RUTAS_ECUADOR = [
   { id: '3', nombre: 'Guayaquil - Centro', zonas: ['Urdesa', 'Sauces', 'Alborada'], pedidos: 31 },
   { id: '4', nombre: 'Guayaquil - Periferia', zonas: ['Samborondón', 'Daule', 'Durán'], pedidos: 12 },
   { id: '5', nombre: 'Cuenca', zonas: ['Centro', 'El Vergel', 'Narancay'], pedidos: 9 },
-]
+] as const
+
+type RutaEcuador = (typeof RUTAS_ECUADOR)[number]
 
 export default function RutasEntregas() {
+  const [detalleRuta, setDetalleRuta] = useState<RutaEcuador | null>(null)
+
   return (
     <div className="space-y-6">
       <div>
@@ -56,24 +61,81 @@ export default function RutasEntregas() {
         </div>
         <div className="divide-y divide-gray-100">
           {RUTAS_ECUADOR.map((ruta) => (
-            <div key={ruta.id} className="px-6 py-4 hover:bg-gray-50/50 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
+            <button
+              key={ruta.id}
+              type="button"
+              onClick={() => setDetalleRuta(ruta)}
+              className="w-full px-6 py-4 hover:bg-gray-50/50 flex items-center justify-between text-left transition-colors group"
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                   <MapPin size={20} className="text-primary-600" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-medium text-gray-900">{ruta.nombre}</h3>
-                  <p className="text-sm text-gray-500">{ruta.zonas.join(' · ')}</p>
+                  <p className="text-sm text-gray-500 truncate">{ruta.zonas.join(' · ')}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 shrink-0">
                 <span className="text-sm font-medium text-gray-700">{ruta.pedidos} pedidos</span>
-                <ChevronRight size={20} className="text-gray-400" />
+                <ChevronRight
+                  size={20}
+                  className="text-gray-400 group-hover:text-primary-600 transition-colors"
+                  aria-hidden
+                />
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
+
+      {detalleRuta && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
+                  <MapPin size={20} className="text-primary-600" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900">{detalleRuta.nombre}</h3>
+                  <p className="text-sm text-gray-500">Ruta de entrega — Ecuador</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetalleRuta(null)}
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 shrink-0"
+                aria-label="Cerrar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4 text-sm">
+              <div>
+                <p className="text-gray-500 mb-2">Zonas cubiertas</p>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  {detalleRuta.zonas.map((z) => (
+                    <li key={z}>{z.trim()}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+                <span className="text-gray-600">Pedidos asignados (demo)</span>
+                <span className="text-lg font-semibold text-gray-900">{detalleRuta.pedidos}</span>
+              </div>
+              <p className="text-xs text-gray-500">
+                Los datos son de demostración. En producción, aquí verás el detalle operativo vinculado a Pancake y al estado de cada entrega.
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+              <button type="button" className="btn-primary" onClick={() => setDetalleRuta(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card bg-amber-50 border-amber-100">
         <p className="text-sm text-gray-700">

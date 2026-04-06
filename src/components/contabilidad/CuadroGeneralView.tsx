@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { RotateCcw, Pencil, Calculator, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { demoStorage, STORAGE_KEYS } from '../../utils/storage'
+import { parseAccountingNumberInput, inputErrorClass } from '../../utils/formValidation'
 import { getExchangeRates } from './ExchangeRatesConfig'
 import ExchangeRatesConfig from './ExchangeRatesConfig'
 
@@ -82,6 +83,7 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
     return stored && stored.pesos?.rows?.length ? deepCloneCuadro(stored) : deepCloneCuadro(data)
   })
   const [editedCells, setEditedCells] = useState<Set<string>>(new Set())
+  const [cellErrors, setCellErrors] = useState<Record<string, string>>({})
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(() => getExchangeRates())
   const [showFormulas, setShowFormulas] = useState(false)
 
@@ -112,6 +114,7 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
       setEditableData(deepCloneCuadro(data))
     }
     setEditedCells(new Set())
+    setCellErrors({})
   }, [data])
 
   useEffect(() => {
@@ -140,6 +143,7 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
     demoStorage.remove(STORAGE_KEYS.CUADRO_GENERAL)
     setEditableData(deepCloneCuadro(data))
     setEditedCells(new Set())
+    setCellErrors({})
   }, [data])
 
   const hasLocal = editableData.local && editableData.local.rows.length > 0
@@ -281,13 +285,25 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
                           ) : (
                             <input
                               type="text"
+                              inputMode="decimal"
                               value={row[col] ?? ''}
+                              title={cellErrors[`${viewMode}-${rowIdx}-${col}`]}
                               onChange={(e) => {
                                 const v = e.target.value.replace(/,/g, '')
-                                const num = v === '' ? 0 : parseFloat(v)
-                                handleCellChange(viewMode, rowIdx, col, isNaN(num) ? 0 : num)
+                                const cellKey = `${viewMode}-${rowIdx}-${col}`
+                                const parsed = parseAccountingNumberInput(v)
+                                if (!parsed.ok) {
+                                  setCellErrors((prev) => ({ ...prev, [cellKey]: parsed.reason }))
+                                  return
+                                }
+                                setCellErrors((prev) => {
+                                  const next = { ...prev }
+                                  delete next[cellKey]
+                                  return next
+                                })
+                                handleCellChange(viewMode, rowIdx, col, parsed.value)
                               }}
-                              className="w-full min-w-[4rem] text-right py-1 px-2 rounded border border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-transparent text-sm"
+                              className={`w-full min-w-[4rem] text-right py-1 px-2 rounded border border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-transparent text-sm ${inputErrorClass(!!cellErrors[`${viewMode}-${rowIdx}-${col}`])}`}
                             />
                           )}
                         </td>

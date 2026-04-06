@@ -4,6 +4,61 @@ import { DollarSign, TrendingUp, TrendingDown, Download, Filter, FileSpreadsheet
 import { accountingApi, Transaction } from '../services/api'
 import { format } from 'date-fns'
 
+const typeLabels: Record<Transaction['type'], string> = {
+  sale: 'Venta',
+  refund: 'Reembolso',
+  expense: 'Gasto',
+}
+
+function csvEscape(value: string | number): string {
+  const s = String(value)
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+  return s
+}
+
+function downloadTransactionsCsv(rows: Transaction[]) {
+  const headers = [
+    'Fecha',
+    'Tipo',
+    'Descripción',
+    'Moneda',
+    'Monto original',
+    'Tipo de cambio',
+    'Monto base (USD)',
+    'País',
+    'Categoría',
+    'ID pedido',
+    'Tienda (shopId)',
+  ]
+  const lines = [
+    headers.map(csvEscape).join(','),
+    ...rows.map((t) =>
+      [
+        format(new Date(t.date), 'yyyy-MM-dd'),
+        typeLabels[t.type],
+        t.description,
+        t.currency,
+        t.amount.toFixed(2),
+        t.exchangeRate.toString(),
+        t.baseCurrencyAmount.toFixed(2),
+        t.countryCode,
+        t.category,
+        t.orderId ?? '',
+        t.shopId,
+      ]
+        .map(csvEscape)
+        .join(',')
+    ),
+  ]
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `contabilidad_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function Accounting() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,7 +121,13 @@ export default function Accounting() {
             <BarChart3 size={18} />
             Análisis de datos
           </Link>
-          <button className="btn-primary flex items-center space-x-2">
+          <button
+            type="button"
+            className="btn-primary flex items-center space-x-2"
+            onClick={() => downloadTransactionsCsv(transactions)}
+            disabled={transactions.length === 0}
+            title={transactions.length === 0 ? 'No hay transacciones para exportar' : 'Descargar CSV de la vista actual'}
+          >
             <Download size={18} />
             <span>Exportar</span>
           </button>
@@ -185,11 +246,7 @@ export default function Accounting() {
                             : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        {transaction.type === 'sale'
-                          ? 'Venta'
-                          : transaction.type === 'refund'
-                          ? 'Reembolso'
-                          : 'Gasto'}
+                        {typeLabels[transaction.type]}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">{transaction.description}</td>

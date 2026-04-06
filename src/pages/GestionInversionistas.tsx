@@ -15,6 +15,7 @@ import { useInversionistas, useInversionistaTiendas, usePaises } from '../hooks/
 import { shopifyApi } from '../services/api'
 import type { Shop } from '../services/api'
 import type { Inversionista } from '../utils/storage'
+import { isValidEmail, isValidCountryCode, inputErrorClass } from '../utils/formValidation'
 
 export default function GestionInversionistas() {
   const { inversionistas, add, update, remove } = useInversionistas()
@@ -31,32 +32,42 @@ export default function GestionInversionistas() {
   })
   const [detalleId, setDetalleId] = useState<string | null>(null)
   const [nuevoEnlace, setNuevoEnlace] = useState<{ paisCodigo: string; shopId: string } | null>(null)
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [enlaceError, setEnlaceError] = useState<string | null>(null)
 
   useEffect(() => {
     shopifyApi.getShops().then((r) => setShops(r.data)).catch(console.error)
   }, [])
 
   const handleSave = () => {
-    if (!form.nombre || !form.email) return
+    const err: Record<string, string> = {}
+    if (!form.nombre?.trim()) err.nombre = 'El nombre es obligatorio.'
+    if (!form.email?.trim()) err.email = 'El email es obligatorio.'
+    else if (!isValidEmail(form.email)) err.email = 'Introduce un email válido.'
+    setFormErrors(err)
+    if (Object.keys(err).length) return
+
     if (isAdding) {
       add({
-        nombre: form.nombre,
-        email: form.email,
+        nombre: form.nombre!.trim(),
+        email: form.email!.trim(),
         telefono: form.telefono,
         activo: form.activo ?? true,
         notas: form.notas,
       })
       setForm({ nombre: '', email: '', telefono: '', activo: true })
+      setFormErrors({})
       setIsAdding(false)
     } else if (editingId) {
       update(editingId, {
-        nombre: form.nombre,
-        email: form.email,
+        nombre: form.nombre!.trim(),
+        email: form.email!.trim(),
         telefono: form.telefono,
         activo: form.activo,
         notas: form.notas,
       })
       setEditingId(null)
+      setFormErrors({})
     }
   }
 
@@ -70,11 +81,13 @@ export default function GestionInversionistas() {
     })
     setEditingId(inv.id)
     setIsAdding(false)
+    setFormErrors({})
   }
 
   const handleCancel = () => {
     setEditingId(null)
     setIsAdding(false)
+    setFormErrors({})
     setForm({ nombre: '', email: '', telefono: '', activo: true })
   }
 
@@ -86,7 +99,15 @@ export default function GestionInversionistas() {
   }
 
   const handleAddEnlace = () => {
-    if (!detalleId || !nuevoEnlace?.paisCodigo || !nuevoEnlace?.shopId) return
+    if (!detalleId || !nuevoEnlace?.paisCodigo || !nuevoEnlace?.shopId) {
+      setEnlaceError('Selecciona país y tienda.')
+      return
+    }
+    if (!isValidCountryCode(nuevoEnlace.paisCodigo)) {
+      setEnlaceError('Código de país inválido (2-3 letras mayúsculas).')
+      return
+    }
+    setEnlaceError(null)
     const shop = shops.find((s) => s.id === nuevoEnlace!.shopId)
     addEnlace({
       inversionistaId: detalleId,
@@ -125,6 +146,7 @@ export default function GestionInversionistas() {
             setIsAdding(true)
             setEditingId(null)
             setForm({ nombre: '', email: '', telefono: '', activo: true })
+            setFormErrors({})
           }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700"
         >
@@ -144,20 +166,28 @@ export default function GestionInversionistas() {
               <input
                 type="text"
                 value={form.nombre || ''}
-                onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, nombre: e.target.value }))
+                  setFormErrors((er) => ({ ...er, nombre: '' }))
+                }}
                 placeholder="María González"
-                className="input"
+                className={`input ${inputErrorClass(!!formErrors.nombre)}`}
               />
+              {formErrors.nombre && <p className="text-xs text-red-600 mt-1">{formErrors.nombre}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
                 type="email"
                 value={form.email || ''}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                  setFormErrors((er) => ({ ...er, email: '' }))
+                }}
                 placeholder="maria@ejemplo.com"
-                className="input"
+                className={`input ${inputErrorClass(!!formErrors.email)}`}
               />
+              {formErrors.email && <p className="text-xs text-red-600 mt-1">{formErrors.email}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
@@ -194,7 +224,6 @@ export default function GestionInversionistas() {
           <div className="flex gap-2 mt-4">
             <button
               onClick={handleSave}
-              disabled={!form.nombre || !form.email}
               className="btn-primary inline-flex items-center gap-2"
             >
               <Check size={16} />
@@ -340,14 +369,18 @@ export default function GestionInversionistas() {
             {nuevoEnlace ? (
               <div className="mt-4 p-4 bg-primary-50 rounded-lg space-y-3">
                 <h4 className="font-medium text-gray-900">Nueva vinculación</h4>
+                {enlaceError && (
+                  <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{enlaceError}</p>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
                     <select
                       value={nuevoEnlace.paisCodigo}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        setEnlaceError(null)
                         setNuevoEnlace((n) => ({ ...n!, paisCodigo: e.target.value, shopId: '' }))
-                      }
+                      }}
                       className="input"
                     >
                       <option value="">Seleccionar</option>
@@ -362,7 +395,10 @@ export default function GestionInversionistas() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Tienda Shopify</label>
                       <select
                         value={nuevoEnlace.shopId}
-                        onChange={(e) => setNuevoEnlace((n) => ({ ...n!, shopId: e.target.value }))}
+                        onChange={(e) => {
+                          setEnlaceError(null)
+                          setNuevoEnlace((n) => ({ ...n!, shopId: e.target.value }))
+                        }}
                         className="input"
                       >
                         <option value="">Seleccionar</option>
@@ -389,7 +425,10 @@ export default function GestionInversionistas() {
                     Vincular
                   </button>
                   <button
-                    onClick={() => setNuevoEnlace(null)}
+                    onClick={() => {
+                      setEnlaceError(null)
+                      setNuevoEnlace(null)
+                    }}
                     className="btn-secondary inline-flex items-center gap-2"
                   >
                     Cancelar
@@ -398,9 +437,10 @@ export default function GestionInversionistas() {
               </div>
             ) : (
               <button
-                onClick={() =>
+                onClick={() => {
+                  setEnlaceError(null)
                   setNuevoEnlace({ paisCodigo: paises.filter((p) => p.activo)[0]?.codigo || '', shopId: '' })
-                }
+                }}
                 className="mt-4 btn-secondary inline-flex items-center gap-2 w-full justify-center"
               >
                 <Link2 size={18} />

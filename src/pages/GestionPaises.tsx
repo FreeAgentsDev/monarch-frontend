@@ -3,33 +3,47 @@ import { Link } from 'react-router-dom'
 import { MapPin, Plus, Pencil, Trash2, ArrowLeft, Check, X } from 'lucide-react'
 import { usePaises } from '../hooks/usePaisesInversionistas'
 import type { Pais } from '../utils/storage'
+import { isValidCountryCode, normalizeCountryCode, inputErrorClass } from '../utils/formValidation'
 
 export default function GestionPaises() {
   const { paises, add, update, remove } = usePaises()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [form, setForm] = useState<Partial<Pais>>({ codigo: '', nombre: '', moneda: '', activo: true })
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleSave = () => {
-    if (!form.codigo || !form.nombre || !form.moneda) return
+    const next: Record<string, string> = {}
+    const codigoNorm = normalizeCountryCode(form.codigo || '')
+    if (!form.nombre?.trim()) next.nombre = 'El nombre es obligatorio.'
+    if (!form.moneda?.trim()) next.moneda = 'La moneda es obligatoria.'
+    if (!codigoNorm) next.codigo = 'El código de país es obligatorio.'
+    else if (!isValidCountryCode(codigoNorm)) {
+      next.codigo = 'Use 2 o 3 letras mayúsculas (ej. CO, EC, ESP).'
+    }
+    setErrors(next)
+    if (Object.keys(next).length) return
+
     if (isAdding) {
       add({
-        codigo: form.codigo.toUpperCase(),
-        nombre: form.nombre,
-        moneda: form.moneda,
+        codigo: codigoNorm,
+        nombre: form.nombre!.trim(),
+        moneda: form.moneda!.trim().toUpperCase(),
         activo: form.activo ?? true,
         orden: paises.length + 1,
       })
       setForm({ codigo: '', nombre: '', moneda: '', activo: true })
+      setErrors({})
       setIsAdding(false)
     } else if (editingId) {
       update(editingId, {
-        codigo: form.codigo?.toUpperCase(),
-        nombre: form.nombre,
-        moneda: form.moneda,
+        codigo: codigoNorm,
+        nombre: form.nombre!.trim(),
+        moneda: form.moneda!.trim().toUpperCase(),
         activo: form.activo,
       })
       setEditingId(null)
+      setErrors({})
     }
   }
 
@@ -42,11 +56,13 @@ export default function GestionPaises() {
     })
     setEditingId(p.id)
     setIsAdding(false)
+    setErrors({})
   }
 
   const handleCancel = () => {
     setEditingId(null)
     setIsAdding(false)
+    setErrors({})
     setForm({ codigo: '', nombre: '', moneda: '', activo: true })
   }
 
@@ -75,6 +91,7 @@ export default function GestionPaises() {
             setIsAdding(true)
             setEditingId(null)
             setForm({ codigo: '', nombre: '', moneda: '', activo: true })
+            setErrors({})
           }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700"
         >
@@ -94,31 +111,44 @@ export default function GestionPaises() {
               <input
                 type="text"
                 value={form.codigo || ''}
-                onChange={(e) => setForm((f) => ({ ...f, codigo: e.target.value }))}
+                onChange={(e) => {
+                  const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3)
+                  setForm((f) => ({ ...f, codigo: v }))
+                  setErrors((er) => ({ ...er, codigo: '' }))
+                }}
                 placeholder="CO"
-                className="input"
+                className={`input ${inputErrorClass(!!errors.codigo)}`}
                 maxLength={3}
               />
+              {errors.codigo && <p className="text-xs text-red-600 mt-1">{errors.codigo}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
               <input
                 type="text"
                 value={form.nombre || ''}
-                onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, nombre: e.target.value }))
+                  setErrors((er) => ({ ...er, nombre: '' }))
+                }}
                 placeholder="Colombia"
-                className="input"
+                className={`input ${inputErrorClass(!!errors.nombre)}`}
               />
+              {errors.nombre && <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Moneda</label>
               <input
                 type="text"
                 value={form.moneda || ''}
-                onChange={(e) => setForm((f) => ({ ...f, moneda: e.target.value }))}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, moneda: e.target.value }))
+                  setErrors((er) => ({ ...er, moneda: '' }))
+                }}
                 placeholder="COP"
-                className="input"
+                className={`input ${inputErrorClass(!!errors.moneda)}`}
               />
+              {errors.moneda && <p className="text-xs text-red-600 mt-1">{errors.moneda}</p>}
             </div>
             <div className="flex items-end gap-2">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -133,7 +163,7 @@ export default function GestionPaises() {
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <button onClick={handleSave} disabled={!form.codigo || !form.nombre || !form.moneda} className="btn-primary inline-flex items-center gap-2">
+            <button onClick={handleSave} className="btn-primary inline-flex items-center gap-2">
               <Check size={16} />
               Guardar
             </button>
