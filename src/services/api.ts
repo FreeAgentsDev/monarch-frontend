@@ -1,5 +1,7 @@
-// API service using static JSON files
-// All data is loaded from /api/*.json files in the public folder
+// API service con modo dual:
+//  - Si VITE_API_URL está configurada (useRealApi) → consume el backend real /api/v1.
+//  - Si no → carga los JSON estáticos de public/api/ (modo demo, sin servidor).
+import { http, useRealApi } from './http'
 
 // Types
 export interface Order {
@@ -300,6 +302,10 @@ let syncLogsCache: any[] | null = null
 // API functions
 export const ordersApi = {
   getAll: async (params?: { status?: string; country?: string; page?: number; limit?: number; storeId?: string; customerEmail?: string; search?: string; dateFrom?: string; dateTo?: string; minAmount?: string; maxAmount?: string; sortBy?: string; sortOrder?: string }) => {
+    if (useRealApi) {
+      const { data } = await http.get<Order[]>('/orders', { params })
+      return createResponse(data)
+    }
     if (!ordersCache) {
       ordersCache = await loadJSON<Order[]>('/api/orders.json')
     }
@@ -307,6 +313,10 @@ export const ordersApi = {
     return createResponse(filtered)
   },
   getById: async (id: string) => {
+    if (useRealApi) {
+      const { data } = await http.get<Order>(`/orders/${id}`)
+      return createResponse(data)
+    }
     if (!ordersCache) {
       ordersCache = await loadJSON<Order[]>('/api/orders.json')
     }
@@ -317,6 +327,10 @@ export const ordersApi = {
     return createResponse(order)
   },
   updateStatus: async (id: string, status: string) => {
+    if (useRealApi) {
+      const { data } = await http.patch<Order>(`/orders/${id}`, { status })
+      return createResponse(data)
+    }
     if (!ordersCache) {
       ordersCache = await loadJSON<Order[]>('/api/orders.json')
     }
@@ -333,12 +347,20 @@ export const ordersApi = {
 
 export const accountingApi = {
   getTransactions: async (params?: { type?: string; dateFrom?: string; dateTo?: string; category?: string; shopId?: string; countryCode?: string; orderId?: string; minAmount?: string; maxAmount?: string; currency?: string; sortBy?: string; sortOrder?: string; page?: number; limit?: number }) => {
+    if (useRealApi) {
+      // El backend devuelve todas las transacciones; el filtrado se aplica en cliente.
+      const { data } = await http.get<Transaction[]>('/transactions')
+      return createResponse(filterTransactions(data, params))
+    }
     if (!transactionsCache) {
       transactionsCache = await loadJSON<Transaction[]>('/api/accounting/transactions.json')
     }
     const filtered = filterTransactions(transactionsCache, params)
     return createResponse(filtered)
   },
+  // NOTA: balance, income, estado-resultados y cuadro-general siguen leyéndose de
+  // los JSON estáticos: el backend los modela normalizados (filas) y estas vistas
+  // esperan una estructura anidada distinta. Migrarlos requiere un transform aparte.
   getBalance: async () => {
     return createResponse(await loadJSON('/api/accounting/reports/balance.json'))
   },
@@ -357,6 +379,10 @@ export const accountingApi = {
 
 export const shopifyApi = {
   getShops: async (params?: { isActive?: boolean | string; countryCode?: string; syncStatus?: string; currency?: string; sortBy?: string; sortOrder?: string; page?: number; limit?: number }) => {
+    if (useRealApi) {
+      const { data } = await http.get<Shop[]>('/shops', { params })
+      return createResponse(data)
+    }
     if (!shopsCache) {
       shopsCache = await loadJSON<Shop[]>('/api/shopify/shops.json')
     }
@@ -364,6 +390,10 @@ export const shopifyApi = {
     return createResponse(filtered)
   },
   syncShop: async (id: string) => {
+    if (useRealApi) {
+      const { data } = await http.post(`/shops/${id}/sync`)
+      return createResponse(data)
+    }
     // Mock sync - just return success
     // In a real app, this would trigger an actual sync
     if (!shopsCache) {
@@ -388,6 +418,10 @@ export const shopifyApi = {
     })
   },
   getSyncLogs: async () => {
+    if (useRealApi) {
+      const { data } = await http.get('/shops/sync-logs')
+      return createResponse(data)
+    }
     if (!syncLogsCache) {
       syncLogsCache = await loadJSON('/api/shopify/sync-logs.json')
     }
@@ -397,6 +431,10 @@ export const shopifyApi = {
 
 export const dashboardApi = {
   getStats: async () => {
+    if (useRealApi) {
+      const { data } = await http.get<DashboardStats>('/dashboard/stats')
+      return createResponse(data)
+    }
     if (!dashboardStatsCache) {
       dashboardStatsCache = await loadJSON<DashboardStats>('/api/dashboard/stats.json')
     }
