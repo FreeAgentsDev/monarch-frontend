@@ -1,334 +1,99 @@
-# Monarch Frontend - Sistema de Gestión Internacional
+# Monarch — API (Go + Gin)
 
-Frontend del sistema de gestión internacional para la joyería Monarch. Plataforma centralizada que integra múltiples tiendas Shopify en una sola interfaz para la gestión de pedidos, contabilidad y operaciones.
+Backend HTTP del proyecto Monarch. Sirve pedidos y tiendas (modo demo en memoria) y está preparado para conectarse después a PostgreSQL.
 
-![Monarch System](https://img.shields.io/badge/Monarch-System-blue)
-![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.2.2-3178C6?logo=typescript)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3.6-38B2AC?logo=tailwind-css)
-![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)
+## Requisitos
 
-## 🎯 Descripción
+- [Go](https://go.dev/dl/) 1.22 o superior
+- Para la base de datos: PostgreSQL (local o servidor del equipo); cliente recomendado [DataGrip](https://www.jetbrains.com/datagrip/) o `psql`
 
-Sistema completo de gestión empresarial diseñado específicamente para la operación internacional de la joyería Monarch. El frontend proporciona una interfaz moderna e intuitiva para:
+## Arrancar el servidor
 
-- **Gestión Centralizada de Pedidos**: Visualización y gestión de pedidos de todas las tiendas Shopify
-- **Contabilidad Multi-moneda**: Sistema contable que maneja múltiples monedas y países
-- **Integración Shopify**: Monitoreo y gestión de múltiples tiendas Shopify
-- **Dashboard Ejecutivo**: Vista consolidada con KPIs y métricas en tiempo real
-
-## ✨ Características
-
-### 🎨 Interfaz Moderna
-- Diseño responsive con Tailwind CSS
-- Componentes reutilizables y modulares
-- Animaciones y transiciones suaves
-- Tema consistente y profesional
-
-### 📊 Dashboard Completo
-- KPIs principales (ventas, pedidos, ticket promedio, utilidad)
-- Gráficos interactivos (barras, líneas, pie)
-- Vista consolidada de todos los módulos
-- Métricas en tiempo real
-
-### 🛒 Gestión de Pedidos
-- Lista completa con filtros avanzados
-- Búsqueda por número, cliente, email
-- Filtros por estado, país, fecha
-- Vista detallada de cada pedido
-- Historial de cambios
-
-### 💰 Módulo de Contabilidad
-- Transacciones financieras
-- Reportes de ingresos y gastos
-- Gráficos de estado de resultados
-- Conversión multi-moneda
-- Exportación de reportes
-
-### 🏪 Integración Shopify
-- Lista de tiendas conectadas
-- Estado de sincronización
-- Estadísticas por tienda
-- Sincronización manual
-- Logs de operaciones
-
-## 🚀 Inicio Rápido
-
-### Prerrequisitos
-
-- Node.js 18+
-- npm o yarn
-
-Los datos se cargan desde archivos JSON estáticos en `public/api/` — no hace falta ningún servidor de API.
-
-### Instalación
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/FreeAgentsDev/monarch-frontend.git
-cd monarch-frontend
-
-# Instalar dependencias
-npm install
-
-# Iniciar servidor de desarrollo
-npm run dev
+```powershell
+cd monarch-backend
+go mod tidy
+go run ./cmd/server
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
+Por defecto escucha en **http://localhost:8080**. Otro puerto:
 
-### Build para Producción
-
-```bash
-# Construir la aplicación
-npm run build
-
-# Preview de la build
-npm run preview
+```powershell
+$env:PORT = "3000"; go run ./cmd/server
 ```
 
-## 🚀 Despliegue en Vercel
+### Rutas útiles (demo)
 
-### Opción 1: Desde GitHub (Recomendado)
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/v1/health` | Estado del servicio |
+| GET | `/api/v1/orders` | Lista de pedidos (query params opcionales) |
+| GET | `/api/v1/orders/:id` | Detalle de pedido |
+| PATCH | `/api/v1/orders/:id` | Body JSON: `{"status":"shipped"}` |
+| GET | `/api/v1/shops` | Tiendas Shopify (demo) |
+| POST | `/api/v1/shops/:id/sync` | Simula sincronización |
 
-1. Conecta tu repositorio en [Vercel](https://vercel.com)
-2. Vercel detectará automáticamente la configuración
-3. ¡Despliega! (Los datos se sirven desde los JSON estáticos en `public/api/`)
+## Frontend (opcional)
 
-### Opción 2: Desde CLI
+En `monarch-frontend`, archivo `.env` o `.env.local`:
 
-```bash
-# Instalar Vercel CLI
-npm install -g vercel
-
-# Desplegar
-vercel
+```env
+VITE_API_URL=http://localhost:8080
 ```
 
-📖 **Guía completa**: Ver [DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)
-
-## 🛠️ Tecnologías
-
-### Core
-- **[React 18](https://react.dev/)** - Biblioteca UI
-- **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático
-- **[Vite](https://vitejs.dev/)** - Build tool y dev server
-
-### Estilos
-- **[Tailwind CSS](https://tailwindcss.com/)** - Framework CSS utility-first
-- **PostCSS** - Procesamiento de CSS
-
-### Routing
-- **[React Router v6](https://reactrouter.com/)** - Navegación y routing
-
-### Visualización de Datos
-- **[Recharts](https://recharts.org/)** - Gráficos y visualizaciones
-
-### HTTP Client
-- **[Axios](https://axios-http.com/)** - Cliente HTTP
-
-### Utilidades
-- **[date-fns](https://date-fns.org/)** - Manipulación de fechas
-- **[Lucide React](https://lucide.dev/)** - Iconos
-
-## 📁 Estructura del Proyecto
-
-```
-frontend/
-├── public/                 # Archivos estáticos
-├── src/
-│   ├── components/        # Componentes reutilizables
-│   │   └── Layout.tsx     # Layout principal con sidebar
-│   ├── pages/             # Páginas de la aplicación
-│   │   ├── Dashboard.tsx  # Dashboard principal
-│   │   ├── Orders.tsx     # Gestión de pedidos
-│   │   ├── OrderDetail.tsx # Detalle de pedido
-│   │   ├── Accounting.tsx # Módulo de contabilidad
-│   │   └── Shopify.tsx    # Integración Shopify
-│   ├── services/          # Servicios y APIs
-│   │   └── api.ts         # Cliente API y tipos
-│   ├── App.tsx            # Componente raíz
-│   ├── main.tsx           # Punto de entrada
-│   └── index.css          # Estilos globales
-├── index.html             # HTML principal
-├── package.json           # Dependencias
-├── vercel.json            # Configuración Vercel
-├── tsconfig.json          # Configuración TypeScript
-├── tailwind.config.js     # Configuración Tailwind
-└── vite.config.ts         # Configuración Vite
-```
-
-## 🎨 Diseño
-
-### Colores Principales
-- **Primary**: `#0ea5e9` (Azul)
-- **Success**: `#10b981` (Verde)
-- **Warning**: `#f59e0b` (Amarillo)
-- **Error**: `#ef4444` (Rojo)
-
-### Componentes
-- Cards con sombras suaves
-- Botones con estados hover
-- Tablas responsivas
-- Gráficos interactivos
-- Sidebar colapsable
-
-## 🔌 Datos (JSON estáticos)
-
-El frontend carga los datos desde archivos JSON en `public/api/`:
-
-- **Dashboard**: `public/api/dashboard/stats.json`
-- **Pedidos**: `public/api/orders.json`
-- **Contabilidad**: `public/api/accounting/transactions.json`, `reports/balance.json`, `reports/income.json`
-- **Shopify**: `public/api/shopify/shops.json`, `sync-logs.json`
-
-El servicio `src/services/api.ts` hace `fetch` a estas rutas (p. ej. `/api/orders.json`). Filtros, paginación y búsqueda se aplican en el cliente. No hace falta servidor de API ni variables de entorno para desarrollo.
-
-Cuando exista un backend real, se puede configurar `VITE_API_URL` y adaptar `api.ts` para apuntar a la API.
-
-## 🧪 Desarrollo
-
-### Scripts Disponibles
-
-```bash
-# Desarrollo
-npm run dev          # Inicia servidor de desarrollo
-
-# Build
-npm run build        # Construye para producción
-npm run preview      # Preview de la build
-
-# Linting
-npm run lint         # Ejecuta ESLint
-```
-
-## 📱 Responsive Design
-
-La aplicación está completamente optimizada para:
-- 📱 Móviles (320px+)
-- 📱 Tablets (768px+)
-- 💻 Desktop (1024px+)
-- 🖥️ Large Desktop (1280px+)
-
-## 🚀 Despliegue
-
-### Vercel (Recomendado)
-
-Ver guía completa en [DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)
-
-```bash
-# Instalar Vercel CLI
-npm i -g vercel
-
-# Desplegar
-vercel
-```
-
-### Otros Proveedores
-
-#### Netlify
-
-```bash
-# Instalar Netlify CLI
-npm i -g netlify-cli
-
-# Desplegar
-netlify deploy --prod
-```
-
-#### Build Manual
-
-```bash
-# Construir
-npm run build
-
-# Los archivos estarán en /dist
-# Subir a tu servidor preferido
-```
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📝 Convenciones de Código
-
-- **Componentes**: PascalCase (`OrderDetail.tsx`)
-- **Funciones**: camelCase (`loadOrders`)
-- **Constantes**: UPPER_SNAKE_CASE (`API_BASE_URL`)
-- **Archivos**: kebab-case para utilidades (`api-client.ts`)
-
-### Estructura de Componentes
-
-```typescript
-// Importaciones externas
-import { useState } from 'react'
-
-// Importaciones internas
-import { api } from '../services/api'
-
-// Tipos
-interface Props {
-  // ...
-}
-
-// Componente
-export default function Component({ prop }: Props) {
-  // Hooks
-  const [state, setState] = useState()
-  
-  // Funciones
-  const handleAction = () => {
-    // ...
-  }
-  
-  // Render
-  return (
-    // JSX
-  )
-}
-```
-
-## 🐛 Troubleshooting
-
-### Error: Cannot find module
-```bash
-# Eliminar node_modules y reinstalar
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Error: Port already in use
-```bash
-# Vite automáticamente usará el siguiente puerto disponible
-# O cambiar en vite.config.ts
-```
-
-### Error: Los datos no cargan (404 en /api/*.json)
-- Verifica que existan los archivos en `public/api/` (orders.json, dashboard/stats.json, etc.)
-- En desarrollo, Vite sirve `public/` en la raíz; en build, se copian a `dist/`
-
-### Error: Build failed en Vercel
-- Verificar que todas las dependencias estén en `package.json`
-- Revisar los logs en el dashboard de Vercel
-
-## 📄 Licencia
-
-Este proyecto es privado y propiedad de Monarch Jewelry. Todos los derechos reservados.
-
-## 👥 Equipo
-
-Desarrollado por **FreeAgentsDev** para **Monarch Jewelry**
-
-## 📞 Soporte
-
-Para soporte, contactar al equipo de desarrollo.
+Reinicia Vite. Pedidos y pantalla Shopify usarán este API en lugar de los JSON estáticos.
 
 ---
 
-**Versión**: 1.0.0  
-**Última actualización**: 2024  
-**Estado**: 🚀 En Desarrollo Activo
+## Cómo mostrar el backend y la base de datos a un senior
+
+### 1. Demo en vivo (misma reunión)
+
+1. **API:** Deja corriendo `go run ./cmd/server` y comparte pantalla.
+2. Abre en el navegador `http://localhost:8080/api/v1/health` o usa **Postman** / **Insomnia** contra las rutas de la tabla anterior.
+3. **Base de datos:** Abre **DataGrip**, conectado a tu instancia PostgreSQL, base `monarch` (o la que uses), y muestra el árbol **Schemas → public → tables** y una consulta de ejemplo:
+
+   ```sql
+   SELECT * FROM countries ORDER BY sort_order;
+   ```
+
+Así se ve el API respondiendo y el esquema real sin exponer credenciales por chat.
+
+### 2. Si el senior está remoto (sin acceso a tu PC)
+
+- **API:** Opciones habituales: desplegar el binario o un contenedor en un PaaS (Railway, Fly.io, Render, etc.) o usar un túnel temporal (**ngrok**, **Cloudflare Tunnel**) apuntando a `localhost:8080`. No subas secretos al repositorio; usa variables de entorno en el proveedor.
+- **PostgreSQL:** **No** abras el puerto 5432 a Internet sin firewall/VPN. Mejor:
+  - Compartir **capturas** o un **video corto** de DataGrip,
+  - Exportar **solo el esquema** y enviarlo por canal seguro del equipo:
+
+    En DataGrip: clic derecho en la base → **SQL Scripts** → **Dump with 'pg_dump'** → marcar solo estructura si no quieres datos.
+
+  - O acordar un **entorno staging** con acceso controlado (VPN, IP allowlist).
+
+### 3. Documentación que suele pedir un senior
+
+- Cómo se levanta el proyecto (esta sección y comandos de arriba).
+- URL base del API y contrato JSON (campos de pedidos/tiendas alineados con el frontend).
+- Dónde vive la DB (host, nombre de base, versión de PostgreSQL) — **sin** pegar contraseñas en el README; eso va en gestor de secretos o `.env` local ignorado por git.
+
+### 4. Respaldo del esquema (recomendado)
+
+Los scripts `.sql` de migración ya no están en este repo. Para no perder el diseño:
+
+- En DataGrip o consola: `pg_dump` solo esquema hacia un archivo, o **Export DDL** desde el IDE.
+- Guarda ese archivo en un lugar acordado con el equipo (repo privado, Drive interno, etc.).
+
+---
+
+## Estructura del código
+
+- `cmd/server/main.go` — entrada
+- `internal/config` — configuración (p. ej. `PORT`)
+- `internal/router` — Gin, CORS, rutas
+- `internal/handlers` — controladores HTTP
+- `internal/store` — almacenamiento en memoria y fixtures JSON embebidos
+
+## Próximos pasos técnicos habituales
+
+- Conectar el API a PostgreSQL (`pgx` / `database/sql`) usando el esquema que ya aplicaste en DataGrip.
+- Autenticación (JWT o sesiones) y sustituir el login demo del frontend.
+- Herramienta de migraciones versionada (p. ej. `golang-migrate`, `goose`) si el equipo lo estandariza.
