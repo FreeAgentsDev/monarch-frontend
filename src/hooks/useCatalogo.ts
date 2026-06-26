@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { demoStorage, STORAGE_KEYS, type ProductoCatalogo } from '../utils/storage'
+import { type ProductoCatalogo, STORAGE_KEYS } from '../utils/storage'
+import { useApiCollection } from './useApiCollection'
 
 function uid() {
   return `prod_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
@@ -13,27 +13,12 @@ const DEFAULT_CATALOGO: ProductoCatalogo[] = [
 ]
 
 export function useCatalogo() {
-  const [productos, setProductos] = useState<ProductoCatalogo[]>(() => {
-    return demoStorage.get<ProductoCatalogo[]>(STORAGE_KEYS.CATALOGO) ?? DEFAULT_CATALOGO
+  const { items, add, update, remove, loading } = useApiCollection<ProductoCatalogo>({
+    storageKey: STORAGE_KEYS.CATALOGO,
+    defaults: DEFAULT_CATALOGO,
+    path: '/catalogo',
+    newLocal: (input) => ({ ...input, id: uid() }) as ProductoCatalogo,
+    mergeLocal: (item, patch) => ({ ...item, ...patch }),
   })
-
-  useEffect(() => {
-    demoStorage.set(STORAGE_KEYS.CATALOGO, productos)
-  }, [productos])
-
-  const add = useCallback((input: Omit<ProductoCatalogo, 'id'>) => {
-    const nuevo: ProductoCatalogo = { ...input, id: uid() }
-    setProductos((prev) => [...prev, nuevo])
-    return nuevo
-  }, [])
-
-  const update = useCallback((id: string, patch: Partial<ProductoCatalogo>) => {
-    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
-  }, [])
-
-  const remove = useCallback((id: string) => {
-    setProductos((prev) => prev.filter((p) => p.id !== id))
-  }, [])
-
-  return { productos, add, update, remove }
+  return { productos: items, add, update, remove, loading }
 }

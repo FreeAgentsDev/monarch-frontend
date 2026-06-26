@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { demoStorage, STORAGE_KEYS, type Empresario } from '../utils/storage'
+import { type Empresario, STORAGE_KEYS } from '../utils/storage'
+import { useApiCollection } from './useApiCollection'
 
 function makeId() {
   return `emp_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`
@@ -15,40 +15,16 @@ const DEFAULT_EMPRESARIOS: Empresario[] = [
 ]
 
 export function useEmpresarios() {
-  const [empresarios, setEmpresarios] = useState<Empresario[]>(() => {
-    const stored = demoStorage.get<Empresario[]>(STORAGE_KEYS.EMPRESARIOS)
-    if (!stored) return DEFAULT_EMPRESARIOS
-    // Si hay datos viejos sin paisCodigo/marca, resetear a defaults
-    const hasOldData = stored.some((e) => !e.paisCodigo || !e.marca)
-    if (hasOldData) {
-      demoStorage.remove(STORAGE_KEYS.EMPRESARIOS)
-      return DEFAULT_EMPRESARIOS
-    }
-    return stored
-  })
-
-  useEffect(() => {
-    demoStorage.set(STORAGE_KEYS.EMPRESARIOS, empresarios)
-  }, [empresarios])
-
-  const api = useMemo(() => {
-    const add = (input: Omit<Empresario, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const { items, add, update, remove, loading, reload } = useApiCollection<Empresario>({
+    storageKey: STORAGE_KEYS.EMPRESARIOS,
+    defaults: DEFAULT_EMPRESARIOS,
+    path: '/empresarios',
+    prepend: true,
+    newLocal: (input) => {
       const now = new Date().toISOString()
-      const next: Empresario = { id: makeId(), createdAt: now, updatedAt: now, ...input }
-      setEmpresarios((prev) => [next, ...prev])
-      return next
-    }
-    const update = (id: string, patch: Partial<Empresario>) => {
-      setEmpresarios((prev) =>
-        prev.map((e) => (e.id === id ? { ...e, ...patch, updatedAt: new Date().toISOString() } : e))
-      )
-    }
-    const remove = (id: string) => {
-      setEmpresarios((prev) => prev.filter((e) => e.id !== id))
-    }
-    return { add, update, remove }
-  }, [])
-
-  return { empresarios, ...api }
+      return { id: makeId(), createdAt: now, updatedAt: now, ...input } as Empresario
+    },
+    mergeLocal: (item, patch) => ({ ...item, ...patch, updatedAt: new Date().toISOString() }),
+  })
+  return { empresarios: items, add, update, remove, loading, reload }
 }
-

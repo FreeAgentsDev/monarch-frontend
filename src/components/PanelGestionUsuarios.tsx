@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Plus, Pencil, Trash2, Shield, UserCheck } from 'lucide-react'
-import { demoStorage, STORAGE_KEYS, DEFAULT_USUARIOS, UsuarioSistema, RolUsuario } from '../utils/storage'
+import { UsuarioSistema, RolUsuario } from '../utils/storage'
+import { useUsuarios } from '../hooks/useUsuarios'
+import { useRealApi } from '../services/http'
 import { isValidEmail, inputErrorClass } from '../utils/formValidation'
 
 const ROL_LABELS: Record<RolUsuario, string> = {
@@ -9,69 +11,55 @@ const ROL_LABELS: Record<RolUsuario, string> = {
   empresario: 'Empresario',
 }
 
-function uid() {
-  return `u_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
-}
+type UsuarioForm = Partial<UsuarioSistema> & { password?: string }
 
 export default function PanelGestionUsuarios() {
-  const [usuarios, setUsuarios] = useState<UsuarioSistema[]>(() => {
-    const stored = demoStorage.get<UsuarioSistema[]>(STORAGE_KEYS.USUARIOS)
-    return stored?.length ? stored : [...DEFAULT_USUARIOS]
-  })
+  const { usuarios, add, update, remove } = useUsuarios()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
-  const [form, setForm] = useState<Partial<UsuarioSistema>>({
+  const [form, setForm] = useState<UsuarioForm>({
     nombre: '',
     email: '',
     rol: 'admin',
     activo: true,
+    password: '',
   })
-  const [formErrors, setFormErrors] = useState<{ nombre?: string; email?: string; rol?: string }>({})
+  const [formErrors, setFormErrors] = useState<{ nombre?: string; email?: string; rol?: string; password?: string }>({})
 
-  useEffect(() => {
-    demoStorage.set(STORAGE_KEYS.USUARIOS, usuarios)
-  }, [usuarios])
+  const resetForm = useCallback(
+    () => setForm({ nombre: '', email: '', rol: 'admin', activo: true, password: '' }),
+    []
+  )
 
-  const handleSave = useCallback(() => {
-    const err: { nombre?: string; email?: string; rol?: string } = {}
+  const handleSave = useCallback(async () => {
+    const err: { nombre?: string; email?: string; rol?: string; password?: string } = {}
     if (!form.nombre?.trim()) err.nombre = 'El nombre es obligatorio.'
     if (!form.email?.trim()) err.email = 'El email es obligatorio.'
     else if (!isValidEmail(form.email)) err.email = 'Introduce un email válido.'
     if (!form.rol) err.rol = 'El rol es obligatorio.'
+    // En modo API la contraseña es obligatoria al crear.
+    if (isAdding && useRealApi && !form.password?.trim()) err.password = 'La contraseña es obligatoria.'
     setFormErrors(err)
     if (Object.keys(err).length) return
 
-    const now = new Date().toISOString()
     const nombre = form.nombre!.trim()
     const email = form.email!.trim()
     const rol = form.rol!
+    const activo = form.activo ?? true
     if (isAdding) {
-      const nuevo: UsuarioSistema = {
-        id: uid(),
-        nombre,
-        email,
-        rol,
-        activo: form.activo ?? true,
-        createdAt: now,
-        updatedAt: now,
-      }
-      setUsuarios((prev) => [...prev, nuevo])
-      setForm({ nombre: '', email: '', rol: 'admin', activo: true })
+      await add({ nombre, email, rol, activo, password: form.password ?? '' })
+      resetForm()
       setFormErrors({})
       setIsAdding(false)
     } else if (editingId) {
-      setUsuarios((prev) =>
-        prev.map((u) =>
-          u.id === editingId
-            ? { ...u, nombre: form.nombre!, email: form.email!, rol: form.rol!, activo: form.activo ?? true, updatedAt: now }
-            : u
-        )
-      )
+      const patch: any = { nombre, email, rol, activo }
+      if (form.password?.trim()) patch.password = form.password.trim()
+      await update(editingId, patch)
       setEditingId(null)
-      setForm({ nombre: '', email: '', rol: 'admin', activo: true })
+      resetForm()
       setFormErrors({})
     }
-  }, [form, isAdding, editingId])
+  }, [form, isAdding, editingId, add, update, resetForm])
 
   const handleEdit = useCallback((u: UsuarioSistema) => {
     setFormErrors({})
@@ -80,6 +68,7 @@ export default function PanelGestionUsuarios() {
       email: u.email,
       rol: u.rol,
       activo: u.activo,
+      password: '',
     })
     setEditingId(u.id)
     setIsAdding(false)
@@ -87,20 +76,20 @@ export default function PanelGestionUsuarios() {
 
   const handleDelete = useCallback((u: UsuarioSistema) => {
     if (window.confirm(`¿Eliminar al usuario "${u.nombre}"?`)) {
-      setUsuarios((prev) => prev.filter((x) => x.id !== u.id))
+      void remove(u.id)
       if (editingId === u.id) {
         setEditingId(null)
-        setForm({ nombre: '', email: '', rol: 'admin', activo: true })
+        resetForm()
       }
     }
-  }, [editingId])
+  }, [editingId, remove, resetForm])
 
   const handleCancel = useCallback(() => {
     setEditingId(null)
     setIsAdding(false)
     setFormErrors({})
-    setForm({ nombre: '', email: '', rol: 'admin', activo: true })
-  }, [])
+    resetForm()
+  }, [resetForm])
 
   return (
     <div className="card overflow-hidden p-0">
@@ -119,7 +108,7 @@ export default function PanelGestionUsuarios() {
           onClick={() => {
             setIsAdding(true)
             setEditingId(null)
-            setForm({ nombre: '', email: '', rol: 'admin', activo: true })
+            resetForm()
             setFormErrors({})
           }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
@@ -188,6 +177,22 @@ export default function PanelGestionUsuarios() {
               />
               <span className="text-sm text-gray-700">Activo</span>
             </label>
+            <div className="sm:col-span-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Contraseña{isAdding && useRealApi ? '' : ' (opcional)'}
+              </label>
+              <input
+                type="password"
+                placeholder={editingId ? 'Dejar en blanco para no cambiar' : 'Contraseña'}
+                value={form.password ?? ''}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, password: e.target.value }))
+                  setFormErrors((er) => ({ ...er, password: undefined }))
+                }}
+                className={`input ${inputErrorClass(!!formErrors.password)}`}
+              />
+              {formErrors.password && <p className="text-xs text-red-600 mt-1">{formErrors.password}</p>}
+            </div>
           </div>
           <div className="flex gap-2 mt-3">
             <button type="button" onClick={handleSave} className="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700">
