@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { demoStorage, STORAGE_KEYS, type PedidoEmpresario } from '../utils/storage'
+import { useCallback, useMemo } from 'react'
+import { type PedidoEmpresario, STORAGE_KEYS } from '../utils/storage'
+import { useApiCollection } from './useApiCollection'
 
 function uid() {
   return `ped_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
@@ -16,31 +17,19 @@ const DEMO: PedidoEmpresario[] = [
 ]
 
 export function usePedidosEmpresario() {
-  const [pedidos, setPedidos] = useState<PedidoEmpresario[]>(() => {
-    return demoStorage.get<PedidoEmpresario[]>(STORAGE_KEYS.PEDIDOS_EMPRESARIO) ?? DEMO
+  const { items: pedidos, add, update, remove } = useApiCollection<PedidoEmpresario>({
+    storageKey: STORAGE_KEYS.PEDIDOS_EMPRESARIO,
+    defaults: DEMO,
+    path: '/pedidos',
+    prepend: true,
+    newLocal: (input) => ({ ...input, id: uid(), createdAt: new Date().toISOString() }) as PedidoEmpresario,
+    mergeLocal: (item, patch) => ({ ...item, ...patch }),
   })
 
-  useEffect(() => {
-    demoStorage.set(STORAGE_KEYS.PEDIDOS_EMPRESARIO, pedidos)
-  }, [pedidos])
-
-  const add = useCallback((input: Omit<PedidoEmpresario, 'id' | 'createdAt'>) => {
-    const nuevo: PedidoEmpresario = { ...input, id: uid(), createdAt: new Date().toISOString() }
-    setPedidos((prev) => [nuevo, ...prev])
-    return nuevo
-  }, [])
-
-  const update = useCallback((id: string, patch: Partial<PedidoEmpresario>) => {
-    setPedidos((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
-  }, [])
-
-  const remove = useCallback((id: string) => {
-    setPedidos((prev) => prev.filter((p) => p.id !== id))
-  }, [])
-
-  const getByEmpresario = useCallback((empresarioId: string) => {
-    return pedidos.filter((p) => p.empresarioId === empresarioId)
-  }, [pedidos])
+  const getByEmpresario = useCallback(
+    (empresarioId: string) => pedidos.filter((p) => p.empresarioId === empresarioId),
+    [pedidos]
+  )
 
   const totales = useMemo(() => {
     return (list: PedidoEmpresario[]) => ({

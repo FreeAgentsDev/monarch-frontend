@@ -19,11 +19,11 @@ export default function Login() {
 
   if (user) return <Navigate to={HOME_BY_ROLE[role]} replace />
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const result = loginWithCredentials(username, password)
+    const result = await loginWithCredentials(username, password)
     setLoading(false)
     if (result.ok && result.role) {
       navigate(HOME_BY_ROLE[result.role], { replace: true })

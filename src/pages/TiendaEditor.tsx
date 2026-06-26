@@ -52,10 +52,10 @@ export default function TiendaEditor() {
   })
   const [saved, setSaved] = useState(false)
 
-  const handleEditorLogin = (e: React.FormEvent) => {
+  const handleEditorLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoginError('')
-    const result = login('empresario', loginUser.trim(), loginPass)
+    const result = await login('empresario', loginUser.trim(), loginPass)
     if (result.ok) {
       try {
         sessionStorage.setItem(EDITOR_SESSION_KEY, '1')
