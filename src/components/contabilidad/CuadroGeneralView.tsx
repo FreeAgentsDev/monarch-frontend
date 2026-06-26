@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { RotateCcw, Pencil, Calculator, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
-import { demoStorage, STORAGE_KEYS } from '../../utils/storage'
+import { STORAGE_KEYS } from '../../utils/storage'
+import { getReport, setReport, removeReport } from '../../services/reportStore'
 import { parseAccountingNumberInput, inputErrorClass } from '../../utils/formValidation'
 import { getExchangeRates } from './ExchangeRatesConfig'
 import ExchangeRatesConfig from './ExchangeRatesConfig'
@@ -79,7 +80,7 @@ function recalcBlock(block: CuadroBlock, isPesos: boolean): CuadroBlock {
 export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
   const [viewMode, setViewMode] = useState<'local' | 'pesos'>('pesos')
   const [editableData, setEditableData] = useState<CuadroGeneralData>(() => {
-    const stored = demoStorage.get<CuadroGeneralData>(STORAGE_KEYS.CUADRO_GENERAL)
+    const stored = getReport<CuadroGeneralData>(STORAGE_KEYS.CUADRO_GENERAL)
     return stored && stored.pesos?.rows?.length ? deepCloneCuadro(stored) : deepCloneCuadro(data)
   })
   const [editedCells, setEditedCells] = useState<Set<string>>(new Set())
@@ -107,7 +108,7 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
   }, [editableData.local, editableData.pesos, exchangeRates])
 
   useEffect(() => {
-    const stored = demoStorage.get<CuadroGeneralData>(STORAGE_KEYS.CUADRO_GENERAL)
+    const stored = getReport<CuadroGeneralData>(STORAGE_KEYS.CUADRO_GENERAL)
     if (stored?.pesos?.rows?.length) {
       setEditableData(deepCloneCuadro(stored))
     } else {
@@ -119,7 +120,7 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
 
   useEffect(() => {
     if (editableData.pesos?.rows?.length) {
-      demoStorage.set(STORAGE_KEYS.CUADRO_GENERAL, editableData)
+      setReport(STORAGE_KEYS.CUADRO_GENERAL, editableData)
     }
   }, [editableData])
 
@@ -140,7 +141,7 @@ export default function CuadroGeneralView({ data }: CuadroGeneralViewProps) {
   )
 
   const handleReset = useCallback(() => {
-    demoStorage.remove(STORAGE_KEYS.CUADRO_GENERAL)
+    removeReport(STORAGE_KEYS.CUADRO_GENERAL, data)
     setEditableData(deepCloneCuadro(data))
     setEditedCells(new Set())
     setCellErrors({})

@@ -358,9 +358,8 @@ export const accountingApi = {
     const filtered = filterTransactions(transactionsCache, params)
     return createResponse(filtered)
   },
-  // NOTA: balance, income, estado-resultados y cuadro-general siguen leyéndose de
-  // los JSON estáticos: el backend los modela normalizados (filas) y estas vistas
-  // esperan una estructura anidada distinta. Migrarlos requiere un transform aparte.
+  // NOTA: balance e income siguen leyéndose de los JSON estáticos (el backend aún
+  // no los expone). cuadro-general y estado-resultados sí usan el backend en modo API.
   getBalance: async () => {
     return createResponse(await loadJSON('/api/accounting/reports/balance.json'))
   },
@@ -370,9 +369,17 @@ export const accountingApi = {
     return createResponse(await loadJSON('/api/accounting/reports/income.json'))
   },
   getEstadoResultados: async () => {
+    if (useRealApi) {
+      const { data } = await http.get('/estado-resultados')
+      return createResponse(data)
+    }
     return createResponse(await loadJSON('/api/accounting/estado-resultados.json'))
   },
   getCuadroGeneral: async () => {
+    if (useRealApi) {
+      const { data } = await http.get('/cuadro-general')
+      return createResponse(data)
+    }
     return createResponse(await loadJSON('/api/accounting/cuadro-general.json'))
   },
 }

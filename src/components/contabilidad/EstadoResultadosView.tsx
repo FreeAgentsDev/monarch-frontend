@@ -1,6 +1,7 @@
 import { useState, useMemo, Fragment, useCallback, useEffect } from 'react'
 import { RotateCcw, Pencil, Calculator, Globe } from 'lucide-react'
-import { demoStorage, STORAGE_KEYS } from '../../utils/storage'
+import { STORAGE_KEYS } from '../../utils/storage'
+import { getReport, setReport, removeReport } from '../../services/reportStore'
 import { getExchangeRates } from './ExchangeRatesConfig'
 import ExchangeRatesConfig from './ExchangeRatesConfig'
 import { parseAccountingNumberInput, parsePercentInput, inputErrorClass } from '../../utils/formValidation'
@@ -76,7 +77,7 @@ function deepCloneEstado(data: { countries: CountryData[] }) {
 
 export default function EstadoResultadosView({ data }: EstadoResultadosViewProps) {
   const [editableData, setEditableData] = useState(() => {
-    const stored = demoStorage.get<{ countries: CountryData[] }>(STORAGE_KEYS.ESTADO_RESULTADOS)
+    const stored = getReport<{ countries: CountryData[] }>(STORAGE_KEYS.ESTADO_RESULTADOS)
     return stored?.countries?.length ? deepCloneEstado(stored) : deepCloneEstado(data)
   })
   const [countryId, setCountryId] = useState<string>(data.countries[0]?.id ?? '')
@@ -87,7 +88,7 @@ export default function EstadoResultadosView({ data }: EstadoResultadosViewProps
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>(() => getExchangeRates())
 
   useEffect(() => {
-    const stored = demoStorage.get<{ countries: CountryData[] }>(STORAGE_KEYS.ESTADO_RESULTADOS)
+    const stored = getReport<{ countries: CountryData[] }>(STORAGE_KEYS.ESTADO_RESULTADOS)
     if (stored?.countries?.length) {
       setEditableData(deepCloneEstado(stored))
     } else {
@@ -99,7 +100,7 @@ export default function EstadoResultadosView({ data }: EstadoResultadosViewProps
 
   useEffect(() => {
     if (editableData.countries?.length) {
-      demoStorage.set(STORAGE_KEYS.ESTADO_RESULTADOS, editableData)
+      setReport(STORAGE_KEYS.ESTADO_RESULTADOS, editableData)
     }
   }, [editableData])
 
@@ -118,7 +119,7 @@ export default function EstadoResultadosView({ data }: EstadoResultadosViewProps
   }, [])
 
   const handleReset = useCallback(() => {
-    demoStorage.remove(STORAGE_KEYS.ESTADO_RESULTADOS)
+    removeReport(STORAGE_KEYS.ESTADO_RESULTADOS, data)
     setEditableData(deepCloneEstado(data))
     setEditedCells(new Set())
     setCellErrors({})

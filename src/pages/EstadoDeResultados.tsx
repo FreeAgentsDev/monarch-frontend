@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, Fragment, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { accountingApi } from '../services/api'
 import { demoStorage, STORAGE_KEYS } from '../utils/storage'
+import { getReport, setReport, removeReport } from '../services/reportStore'
 import { usePaises } from '../hooks/usePaisesInversionistas'
 import { getExchangeRates } from '../components/contabilidad/ExchangeRatesConfig'
 import ExchangeRatesConfig from '../components/contabilidad/ExchangeRatesConfig'
@@ -154,7 +155,7 @@ export default function EstadoDeResultados() {
         countries: mergeCountriesWithPaises(payload?.countries ?? [], paises),
       }
       setData(merged)
-      const stored = demoStorage.get<EstadoResultadosData>(STORAGE_KEYS.ESTADO_RESULTADOS)
+      const stored = getReport<EstadoResultadosData>(STORAGE_KEYS.ESTADO_RESULTADOS)
       const toUse = stored?.countries?.length ? deepCloneData(stored) : deepCloneData(merged)
       setEditableData(toUse)
       if (toUse?.countries?.length) setCountryId(toUse.countries[0].id)
@@ -183,13 +184,13 @@ export default function EstadoDeResultados() {
 
   useEffect(() => {
     if (editableData?.countries?.length) {
-      demoStorage.set(STORAGE_KEYS.ESTADO_RESULTADOS, editableData)
+      setReport(STORAGE_KEYS.ESTADO_RESULTADOS, editableData)
     }
   }, [editableData])
 
   const handleReset = useCallback(() => {
     if (data) {
-      demoStorage.remove(STORAGE_KEYS.ESTADO_RESULTADOS)
+      removeReport(STORAGE_KEYS.ESTADO_RESULTADOS, data)
       setEditableData(deepCloneData(data))
       setEditedCells(new Set())
       setCellErrors({})
