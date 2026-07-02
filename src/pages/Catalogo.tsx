@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Save, X, Eye, Image } from 'lucide-react'
+import { Plus, Pencil, Trash2, Save, X, Eye, Image, Upload } from 'lucide-react'
 import { useCatalogo } from '../hooks/useCatalogo'
 import { usePaises } from '../hooks/usePaisesInversionistas'
+import { uploadsApi } from '../services/api'
 import type { ProductoCatalogo } from '../utils/storage'
 import { inputErrorClass } from '../utils/formValidation'
 
@@ -20,13 +21,31 @@ export default function Catalogo() {
   const [draft, setDraft] = useState(EMPTY_DRAFT)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [preview, setPreview] = useState<ProductoCatalogo | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
 
-  const startAdd = () => { setIsAdding(true); setEditingId(null); setErrors({}); setDraft(EMPTY_DRAFT) }
+  const startAdd = () => { setIsAdding(true); setEditingId(null); setErrors({}); setUploadError(''); setDraft(EMPTY_DRAFT) }
   const startEdit = (p: ProductoCatalogo) => {
-    setIsAdding(false); setEditingId(p.id); setErrors({})
+    setIsAdding(false); setEditingId(p.id); setErrors({}); setUploadError('')
     setDraft({ sku: p.sku, nombre: p.nombre, categoria: p.categoria, precioMayorista: p.precioMayorista, moneda: p.moneda, imagen: p.imagen, activo: p.activo })
   }
-  const cancel = () => { setIsAdding(false); setEditingId(null); setErrors({}) }
+  const cancel = () => { setIsAdding(false); setEditingId(null); setErrors({}); setUploadError('') }
+
+  const handleFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadError('')
+    setUploading(true)
+    try {
+      const url = await uploadsApi.uploadImagen(file)
+      setDraft((d) => ({ ...d, imagen: url }))
+    } catch (err: any) {
+      setUploadError(err?.response?.data?.error || err?.message || 'No se pudo subir la imagen')
+    } finally {
+      setUploading(false)
+      e.target.value = '' // permite volver a elegir el mismo archivo
+    }
+  }
 
   const save = () => {
     const err: Record<string, string> = {}
@@ -112,10 +131,24 @@ export default function Catalogo() {
                 <option>USD</option><option>COP</option><option>EUR</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL imagen</label>
+            <div className="sm:col-span-2 lg:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
+              <div className="flex items-center gap-3">
+                {draft.imagen ? (
+                  <img src={draft.imagen} alt="preview" className="w-12 h-12 rounded-lg object-cover border border-gray-200 bg-gray-50" />
+                ) : (
+                  <div className="w-12 h-12 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center">
+                    <Image size={16} className="text-gray-300" />
+                  </div>
+                )}
+                <label className={`btn-secondary cursor-pointer ${uploading ? 'opacity-60 pointer-events-none' : ''}`}>
+                  <Upload size={16} /> {uploading ? 'Subiendo…' : 'Subir imagen'}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+                </label>
+              </div>
               <input type="text" value={draft.imagen} onChange={(e) => setDraft((d) => ({ ...d, imagen: e.target.value }))}
-                className="input" placeholder="/img/producto.webp" />
+                className="input mt-2" placeholder="o pega una URL: /img/producto.webp" />
+              {uploadError && <p className="text-xs text-red-600 mt-1">{uploadError}</p>}
             </div>
             <div className="flex items-end">
               <label className="flex items-center gap-2 cursor-pointer">

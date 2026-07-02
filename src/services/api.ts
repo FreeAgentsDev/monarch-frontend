@@ -449,6 +449,31 @@ export const dashboardApi = {
   },
 }
 
+// Subida de imágenes.
+//  - Modo API real → POST multipart a /uploads (backend lo sube a R2 y devuelve la URL pública).
+//  - Modo demo     → sin backend, se devuelve un data URL para previsualizar y persistir localmente.
+export const uploadsApi = {
+  uploadImagen: async (file: File): Promise<string> => {
+    if (useRealApi) {
+      const form = new FormData()
+      form.append('file', file)
+      // No fijamos Content-Type: el navegador agrega el boundary de multipart.
+      const { data } = await http.post<{ url: string }>('/uploads', form)
+      return data.url
+    }
+    return await readFileAsDataURL(file)
+  },
+}
+
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error ?? new Error('No se pudo leer el archivo'))
+    reader.readAsDataURL(file)
+  })
+}
+
 // Export default for backward compatibility (if needed)
 export default {
   get: async <T>(url: string, _config?: any) => {
