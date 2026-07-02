@@ -85,11 +85,14 @@ export default function Layout({ children }: LayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white shadow-sm ring-1 ring-primary-900/10">
+                <span className="text-lg font-bold">M</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">Monarch</span>
+              <div className="flex flex-col leading-none">
+                <span className="text-lg font-bold tracking-tight text-gray-900">Monarch</span>
+                <span className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Gestión</span>
+              </div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
